@@ -2,28 +2,27 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdatePaymentRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return false;
+        return $this->user()->can('update', $this->route('payment'));
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
+     * @return array<string, mixed>
      */
     public function rules(): array
     {
         return [
-            //
+            'student_id' => ['required', 'exists:students,id'],
+            'amount' => ['required', 'numeric', 'min:0.01'],
+            'period_month' => ['required', 'integer', 'between:1,12'],
+            'period_year' => ['required', 'integer', 'min:2020'],
+            'paid_at' => ['required', 'date'],
+            'notes' => ['nullable', 'string', 'max:1000'],
         ];
     }
 }

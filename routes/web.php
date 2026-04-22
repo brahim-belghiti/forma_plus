@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\LevelController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherController;
@@ -22,6 +23,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('teachers', TeacherController::class)->except(['show']);
     Route::resource('classrooms', ClassroomController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('timeslots', TimeslotController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('payments', PaymentController::class)->only(['index', 'store', 'update', 'destroy']);
 });
 
 require __DIR__.'/settings.php';

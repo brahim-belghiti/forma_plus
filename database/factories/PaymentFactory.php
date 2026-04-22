@@ -3,6 +3,8 @@
 namespace Database\Factories;
 
 use App\Models\Payment;
+use App\Models\School;
+use App\Models\Student;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -11,14 +13,18 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class PaymentFactory extends Factory
 {
     /**
-     * Define the model's default state.
-     *
      * @return array<string, mixed>
      */
     public function definition(): array
     {
         return [
-            //
+            'school_id' => School::factory(),
+            'student_id' => Student::factory(),
+            'amount' => fake()->randomFloat(2, 100, 1000),
+            'period_month' => fake()->numberBetween(1, 12),
+            'period_year' => fake()->numberBetween(2024, 2026),
+            'paid_at' => fake()->date(),
+            'notes' => fake()->optional()->sentence(),
         ];
     }
 }
