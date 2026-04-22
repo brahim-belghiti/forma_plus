@@ -2,64 +2,63 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreTimeslotRequest;
+use App\Http\Requests\UpdateTimeslotRequest;
+use App\Http\Resources\ClassroomResource;
+use App\Http\Resources\LevelResource;
+use App\Http\Resources\SubjectResource;
+use App\Http\Resources\TeacherResource;
+use App\Http\Resources\TimeslotResource;
+use App\Models\Classroom;
+use App\Models\Level;
+use App\Models\Subject;
+use App\Models\Teacher;
 use App\Models\Timeslot;
-use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class TimeslotController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(): Response
     {
-        //
+        Gate::authorize('viewAny', Timeslot::class);
+
+        return Inertia::render('timeslots/index', [
+            'timeslots' => TimeslotResource::collection(
+                Timeslot::with(['teacher', 'subject', 'level', 'classroom'])
+                    ->orderByRaw('FIELD(day_of_week, 1, 2, 3, 4, 5, 6, 0)')
+                    ->orderBy('start_time')
+                    ->get()
+            ),
+            'teachers' => TeacherResource::collection(Teacher::orderBy('first_name')->get()),
+            'subjects' => SubjectResource::collection(Subject::orderBy('name')->get()),
+            'levels' => LevelResource::collection(Level::orderBy('name')->get()),
+            'classrooms' => ClassroomResource::collection(Classroom::orderBy('name')->get()),
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(StoreTimeslotRequest $request): RedirectResponse
     {
-        //
+        Timeslot::create($request->validated());
+
+        return back();
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function update(UpdateTimeslotRequest $request, Timeslot $timeslot): RedirectResponse
     {
-        //
+        $timeslot->update($request->validated());
+
+        return back();
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Timeslot $timeslot)
+    public function destroy(Timeslot $timeslot): RedirectResponse
     {
-        //
-    }
+        Gate::authorize('delete', $timeslot);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Timeslot $timeslot)
-    {
-        //
-    }
+        $timeslot->delete();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Timeslot $timeslot)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Timeslot $timeslot)
-    {
-        //
+        return back();
     }
 }

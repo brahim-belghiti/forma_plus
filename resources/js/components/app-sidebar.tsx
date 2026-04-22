@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, DoorOpen, FolderGit2, GraduationCap, LayoutGrid, Layers, UserCheck, Users } from 'lucide-react';
+import { BookOpen, Calendar, DoorOpen, FolderGit2, GraduationCap, LayoutGrid, Layers, UserCheck, Users } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -19,6 +19,7 @@ import { index as studentsIndex } from '@/actions/App/Http/Controllers/StudentCo
 import { index as subjectsIndex } from '@/actions/App/Http/Controllers/SubjectController';
 import { index as teachersIndex } from '@/actions/App/Http/Controllers/TeacherController';
 import { index as classroomsIndex } from '@/actions/App/Http/Controllers/ClassroomController';
+import { index as timeslotsIndex } from '@/actions/App/Http/Controllers/TimeslotController';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -51,6 +52,11 @@ const mainNavItems: NavItem[] = [
         title: 'Classrooms',
         href: classroomsIndex.url(),
         icon: DoorOpen,
+    },
+    {
+        title: 'Schedule',
+        href: timeslotsIndex.url(),
+        icon: Calendar,
     },
 ];
 

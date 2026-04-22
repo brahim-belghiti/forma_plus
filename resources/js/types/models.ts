@@ -55,6 +55,24 @@ export type Student = {
     updated_at: string;
 };
 
+export type Timeslot = {
+    id: number;
+    teacher_id: number;
+    subject_id: number;
+    level_id: number;
+    classroom_id: number;
+    day_of_week: number;
+    day_of_week_label: string;
+    start_time: string;
+    end_time: string;
+    teacher?: Teacher;
+    subject?: Subject;
+    level?: Level;
+    classroom?: Classroom;
+    created_at: string;
+    updated_at: string;
+};
+
 export type PaginatedData<T> = {
     data: T[];
     links: {
