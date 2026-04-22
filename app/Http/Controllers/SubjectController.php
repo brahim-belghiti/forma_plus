@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateSubjectRequest;
 use App\Http\Resources\SubjectResource;
 use App\Models\Subject;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -14,7 +15,7 @@ class SubjectController extends Controller
 {
     public function index(): Response
     {
-        $this->authorize('viewAny', Subject::class);
+        Gate::authorize('viewAny', Subject::class);
 
         return Inertia::render('subjects/index', [
             'subjects' => SubjectResource::collection(
@@ -39,7 +40,7 @@ class SubjectController extends Controller
 
     public function destroy(Subject $subject): RedirectResponse
     {
-        $this->authorize('delete', $subject);
+        Gate::authorize('delete', $subject);
 
         $subject->delete();
 

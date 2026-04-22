@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateLevelRequest;
 use App\Http\Resources\LevelResource;
 use App\Models\Level;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -14,7 +15,7 @@ class LevelController extends Controller
 {
     public function index(): Response
     {
-        $this->authorize('viewAny', Level::class);
+        Gate::authorize('viewAny', Level::class);
 
         return Inertia::render('levels/index', [
             'levels' => LevelResource::collection(
@@ -39,7 +40,7 @@ class LevelController extends Controller
 
     public function destroy(Level $level): RedirectResponse
     {
-        $this->authorize('delete', $level);
+        Gate::authorize('delete', $level);
 
         $level->delete();
 
