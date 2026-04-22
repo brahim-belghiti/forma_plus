@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, Calendar, CreditCard, DoorOpen, FolderGit2, GraduationCap, LayoutGrid, Layers, UserCheck, Users } from 'lucide-react';
+import { BookOpen, Banknote, Calendar, CreditCard, DoorOpen, FolderGit2, GraduationCap, LayoutGrid, Layers, Receipt, UserCheck, Users } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -21,6 +21,8 @@ import { index as teachersIndex } from '@/actions/App/Http/Controllers/TeacherCo
 import { index as classroomsIndex } from '@/actions/App/Http/Controllers/ClassroomController';
 import { index as timeslotsIndex } from '@/actions/App/Http/Controllers/TimeslotController';
 import { index as paymentsIndex } from '@/actions/App/Http/Controllers/PaymentController';
+import { index as salariesIndex } from '@/actions/App/Http/Controllers/SalaryController';
+import { index as expensesIndex } from '@/actions/App/Http/Controllers/ExpenseController';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -63,6 +65,16 @@ const mainNavItems: NavItem[] = [
         title: 'Payments',
         href: paymentsIndex.url(),
         icon: CreditCard,
+    },
+    {
+        title: 'Salaries',
+        href: salariesIndex.url(),
+        icon: Banknote,
+    },
+    {
+        title: 'Expenses',
+        href: expensesIndex.url(),
+        icon: Receipt,
     },
 ];
 

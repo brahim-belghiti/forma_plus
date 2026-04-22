@@ -86,6 +86,29 @@ export type Payment = {
     updated_at: string;
 };
 
+export type Salary = {
+    id: number;
+    teacher_id: number;
+    amount: string;
+    period_month: number;
+    period_year: number;
+    paid_at: string;
+    notes: string | null;
+    teacher?: Teacher;
+    created_at: string;
+    updated_at: string;
+};
+
+export type Expense = {
+    id: number;
+    description: string;
+    amount: string;
+    spent_at: string;
+    notes: string | null;
+    created_at: string;
+    updated_at: string;
+};
+
 export type PaginatedData<T> = {
     data: T[];
     links: {
