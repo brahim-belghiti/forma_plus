@@ -16,6 +16,22 @@ export type Subject = {
     updated_at: string;
 };
 
+export type Teacher = {
+    id: number;
+    first_name: string;
+    last_name: string;
+    full_name: string;
+    phone: string | null;
+    salary_rate: string | null;
+    effective_salary_rate: number;
+    subjects?: Subject[];
+    levels?: Level[];
+    subjects_count?: number;
+    levels_count?: number;
+    created_at: string;
+    updated_at: string;
+};
+
 export type Student = {
     id: number;
     first_name: string;

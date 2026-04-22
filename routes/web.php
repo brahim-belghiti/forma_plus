@@ -3,6 +3,7 @@
 use App\Http\Controllers\LevelController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
+use App\Http\Controllers\TeacherController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
@@ -16,6 +17,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('levels', LevelController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('subjects', SubjectController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('students', StudentController::class)->except(['show']);
+    Route::resource('teachers', TeacherController::class)->except(['show']);
 });
 
 require __DIR__.'/settings.php';

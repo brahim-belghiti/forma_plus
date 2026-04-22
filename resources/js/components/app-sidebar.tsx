@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, GraduationCap, LayoutGrid, Layers, Users } from 'lucide-react';
+import { BookOpen, FolderGit2, GraduationCap, LayoutGrid, Layers, UserCheck, Users } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -17,6 +17,7 @@ import { dashboard } from '@/routes';
 import { index as levelsIndex } from '@/actions/App/Http/Controllers/LevelController';
 import { index as studentsIndex } from '@/actions/App/Http/Controllers/StudentController';
 import { index as subjectsIndex } from '@/actions/App/Http/Controllers/SubjectController';
+import { index as teachersIndex } from '@/actions/App/Http/Controllers/TeacherController';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -39,6 +40,11 @@ const mainNavItems: NavItem[] = [
         title: 'Students',
         href: studentsIndex.url(),
         icon: Users,
+    },
+    {
+        title: 'Teachers',
+        href: teachersIndex.url(),
+        icon: UserCheck,
     },
 ];
 
