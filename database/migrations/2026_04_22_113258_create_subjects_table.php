@@ -8,16 +8,18 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('schools', function (Blueprint $table) {
+        Schema::create('subjects', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('school_id')->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->decimal('default_salary_rate', 5, 2)->default(60.00);
             $table->timestamps();
+
+            $table->unique(['school_id', 'name']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('schools');
+        Schema::dropIfExists('subjects');
     }
 };

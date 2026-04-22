@@ -10,15 +10,11 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class SchoolFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            //
+            'name' => fake()->company().' School',
+            'default_salary_rate' => 60.00,
         ];
     }
 }
