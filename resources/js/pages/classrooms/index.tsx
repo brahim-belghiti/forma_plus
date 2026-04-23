@@ -44,7 +44,7 @@ export default function ClassroomsIndex({ classrooms }: Props) {
     }
 
     function handleDelete(classroom: Classroom) {
-        if (!confirm(`Are you sure you want to delete "${classroom.name}"?`)) return;
+        if (!confirm(`Voulez-vous vraiment supprimer « ${classroom.name} » ?`)) return;
         router.delete(destroy.url(classroom.id));
     }
 
@@ -55,12 +55,12 @@ export default function ClassroomsIndex({ classrooms }: Props) {
 
     return (
         <>
-            <Head title="Classrooms" />
+            <Head title="Salles" />
             <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-semibold">Classrooms</h1>
+                <h1 className="text-2xl font-semibold">Salles</h1>
                 <Button onClick={() => setShowCreate(true)}>
                     <Plus className="mr-2 h-4 w-4" />
-                    Add Classroom
+                    Ajouter une salle
                 </Button>
             </div>
 
@@ -68,7 +68,7 @@ export default function ClassroomsIndex({ classrooms }: Props) {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Name</TableHead>
+                            <TableHead>Nom</TableHead>
                             <TableHead className="w-24"></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -76,7 +76,7 @@ export default function ClassroomsIndex({ classrooms }: Props) {
                         {classrooms.data.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={2} className="text-center text-muted-foreground py-8">
-                                    No classrooms yet. Add your first classroom to get started.
+                                    Aucune salle pour l'instant. Ajoutez votre première salle pour commencer.
                                 </TableCell>
                             </TableRow>
                         ) : (
@@ -103,17 +103,17 @@ export default function ClassroomsIndex({ classrooms }: Props) {
             <Dialog open={showCreate} onOpenChange={setShowCreate}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Add Classroom</DialogTitle>
+                        <DialogTitle>Ajouter une salle</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleCreate}>
                         <div className="grid gap-4 py-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="create-name">Name</Label>
+                                <Label htmlFor="create-name">Nom</Label>
                                 <Input
                                     id="create-name"
                                     value={createForm.data.name}
                                     onChange={(e) => createForm.setData('name', e.target.value)}
-                                    placeholder="e.g. Salle 1"
+                                    placeholder="ex : Salle 1"
                                     autoFocus
                                 />
                                 <InputError message={createForm.errors.name} />
@@ -121,11 +121,11 @@ export default function ClassroomsIndex({ classrooms }: Props) {
                         </div>
                         <DialogFooter>
                             <DialogClose asChild>
-                                <Button variant="outline" type="button">Cancel</Button>
+                                <Button variant="outline" type="button">Annuler</Button>
                             </DialogClose>
                             <Button type="submit" disabled={createForm.processing}>
                                 {createForm.processing && <Spinner />}
-                                Create
+                                Créer
                             </Button>
                         </DialogFooter>
                     </form>
@@ -135,12 +135,12 @@ export default function ClassroomsIndex({ classrooms }: Props) {
             <Dialog open={!!editingClassroom} onOpenChange={(open) => !open && setEditingClassroom(null)}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Edit Classroom</DialogTitle>
+                        <DialogTitle>Modifier la salle</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleEdit}>
                         <div className="grid gap-4 py-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="edit-name">Name</Label>
+                                <Label htmlFor="edit-name">Nom</Label>
                                 <Input
                                     id="edit-name"
                                     value={editForm.data.name}
@@ -152,11 +152,11 @@ export default function ClassroomsIndex({ classrooms }: Props) {
                         </div>
                         <DialogFooter>
                             <DialogClose asChild>
-                                <Button variant="outline" type="button">Cancel</Button>
+                                <Button variant="outline" type="button">Annuler</Button>
                             </DialogClose>
                             <Button type="submit" disabled={editForm.processing}>
                                 {editForm.processing && <Spinner />}
-                                Save
+                                Enregistrer
                             </Button>
                         </DialogFooter>
                     </form>
@@ -168,6 +168,6 @@ export default function ClassroomsIndex({ classrooms }: Props) {
 
 ClassroomsIndex.layout = {
     breadcrumbs: [
-        { title: 'Classrooms', href: index.url() },
+        { title: 'Salles', href: index.url() },
     ],
 };

@@ -27,8 +27,8 @@ export default function CreateStudent({ levels, subjects }: Props) {
 
     return (
         <>
-            <Head title="Add Student" />
-            <h1 className="text-2xl font-semibold mb-6">Add Student</h1>
+            <Head title="Ajouter un élève" />
+            <h1 className="text-2xl font-semibold mb-6">Ajouter un élève</h1>
             <StudentForm
                 data={form.data}
                 errors={form.errors}
@@ -37,7 +37,7 @@ export default function CreateStudent({ levels, subjects }: Props) {
                 subjects={subjects}
                 setData={form.setData}
                 onSubmit={handleSubmit}
-                submitLabel="Create Student"
+                submitLabel="Créer l'élève"
             />
         </>
     );
@@ -45,7 +45,7 @@ export default function CreateStudent({ levels, subjects }: Props) {
 
 CreateStudent.layout = {
     breadcrumbs: [
-        { title: 'Students', href: index.url() },
-        { title: 'Add Student', href: '#' },
+        { title: 'Élèves', href: index.url() },
+        { title: 'Ajouter un élève', href: '#' },
     ],
 };

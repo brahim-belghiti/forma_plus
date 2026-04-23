@@ -39,7 +39,7 @@ export default function TeacherForm({ data, errors, processing, levels, subjects
         <form onSubmit={onSubmit} className="space-y-6 max-w-2xl">
             <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                    <Label htmlFor="first_name">First name</Label>
+                    <Label htmlFor="first_name">Prénom</Label>
                     <Input
                         id="first_name"
                         value={data.first_name}
@@ -50,7 +50,7 @@ export default function TeacherForm({ data, errors, processing, levels, subjects
                     <InputError message={errors.first_name} />
                 </div>
                 <div className="grid gap-2">
-                    <Label htmlFor="last_name">Last name</Label>
+                    <Label htmlFor="last_name">Nom</Label>
                     <Input
                         id="last_name"
                         value={data.last_name}
@@ -63,7 +63,7 @@ export default function TeacherForm({ data, errors, processing, levels, subjects
 
             <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                    <Label htmlFor="phone">Phone</Label>
+                    <Label htmlFor="phone">Téléphone</Label>
                     <Input
                         id="phone"
                         value={data.phone}
@@ -72,7 +72,7 @@ export default function TeacherForm({ data, errors, processing, levels, subjects
                     <InputError message={errors.phone} />
                 </div>
                 <div className="grid gap-2">
-                    <Label htmlFor="salary_rate">Salary rate (%)</Label>
+                    <Label htmlFor="salary_rate">Taux de salaire (%)</Label>
                     <Input
                         id="salary_rate"
                         type="number"
@@ -81,17 +81,17 @@ export default function TeacherForm({ data, errors, processing, levels, subjects
                         step="0.01"
                         value={data.salary_rate}
                         onChange={(e) => setData('salary_rate', e.target.value)}
-                        placeholder="Leave empty for school default"
+                        placeholder="Laisser vide pour utiliser le taux par défaut"
                     />
                     <InputError message={errors.salary_rate} />
                 </div>
             </div>
 
             <div className="grid gap-2">
-                <Label>Subjects taught</Label>
+                <Label>Matières enseignées</Label>
                 <div className="grid grid-cols-2 gap-2 rounded-lg border p-4">
                     {subjects.data.length === 0 ? (
-                        <p className="text-sm text-muted-foreground col-span-2">No subjects available.</p>
+                        <p className="text-sm text-muted-foreground col-span-2">Aucune matière disponible.</p>
                     ) : (
                         subjects.data.map((subject) => (
                             <label key={subject.id} className="flex items-center gap-2 cursor-pointer">
@@ -108,10 +108,10 @@ export default function TeacherForm({ data, errors, processing, levels, subjects
             </div>
 
             <div className="grid gap-2">
-                <Label>Levels taught</Label>
+                <Label>Niveaux enseignés</Label>
                 <div className="grid grid-cols-2 gap-2 rounded-lg border p-4">
                     {levels.data.length === 0 ? (
-                        <p className="text-sm text-muted-foreground col-span-2">No levels available.</p>
+                        <p className="text-sm text-muted-foreground col-span-2">Aucun niveau disponible.</p>
                     ) : (
                         levels.data.map((level) => (
                             <label key={level.id} className="flex items-center gap-2 cursor-pointer">

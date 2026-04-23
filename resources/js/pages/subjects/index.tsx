@@ -44,7 +44,7 @@ export default function SubjectsIndex({ subjects }: Props) {
     }
 
     function handleDelete(subject: Subject) {
-        if (!confirm(`Are you sure you want to delete "${subject.name}"?`)) return;
+        if (!confirm(`Voulez-vous vraiment supprimer « ${subject.name} » ?`)) return;
         router.delete(destroy.url(subject.id));
     }
 
@@ -55,12 +55,12 @@ export default function SubjectsIndex({ subjects }: Props) {
 
     return (
         <>
-            <Head title="Subjects" />
+            <Head title="Matières" />
             <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-semibold">Subjects</h1>
+                <h1 className="text-2xl font-semibold">Matières</h1>
                 <Button onClick={() => setShowCreate(true)}>
                     <Plus className="mr-2 h-4 w-4" />
-                    Add Subject
+                    Ajouter une matière
                 </Button>
             </div>
 
@@ -68,8 +68,8 @@ export default function SubjectsIndex({ subjects }: Props) {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead className="w-32 text-center">Levels</TableHead>
+                            <TableHead>Nom</TableHead>
+                            <TableHead className="w-32 text-center">Niveaux</TableHead>
                             <TableHead className="w-24"></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -77,7 +77,7 @@ export default function SubjectsIndex({ subjects }: Props) {
                         {subjects.data.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
-                                    No subjects yet. Add your first subject to get started.
+                                    Aucune matière pour l'instant. Ajoutez votre première matière pour commencer.
                                 </TableCell>
                             </TableRow>
                         ) : (
@@ -102,21 +102,20 @@ export default function SubjectsIndex({ subjects }: Props) {
                 </Table>
             </div>
 
-            {/* Create Dialog */}
             <Dialog open={showCreate} onOpenChange={setShowCreate}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Add Subject</DialogTitle>
+                        <DialogTitle>Ajouter une matière</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleCreate}>
                         <div className="grid gap-4 py-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="create-name">Name</Label>
+                                <Label htmlFor="create-name">Nom</Label>
                                 <Input
                                     id="create-name"
                                     value={createForm.data.name}
                                     onChange={(e) => createForm.setData('name', e.target.value)}
-                                    placeholder="e.g. Mathematiques"
+                                    placeholder="ex : Mathématiques"
                                     autoFocus
                                 />
                                 <InputError message={createForm.errors.name} />
@@ -124,27 +123,26 @@ export default function SubjectsIndex({ subjects }: Props) {
                         </div>
                         <DialogFooter>
                             <DialogClose asChild>
-                                <Button variant="outline" type="button">Cancel</Button>
+                                <Button variant="outline" type="button">Annuler</Button>
                             </DialogClose>
                             <Button type="submit" disabled={createForm.processing}>
                                 {createForm.processing && <Spinner />}
-                                Create
+                                Créer
                             </Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>
             </Dialog>
 
-            {/* Edit Dialog */}
             <Dialog open={!!editingSubject} onOpenChange={(open) => !open && setEditingSubject(null)}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Edit Subject</DialogTitle>
+                        <DialogTitle>Modifier la matière</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleEdit}>
                         <div className="grid gap-4 py-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="edit-name">Name</Label>
+                                <Label htmlFor="edit-name">Nom</Label>
                                 <Input
                                     id="edit-name"
                                     value={editForm.data.name}
@@ -156,11 +154,11 @@ export default function SubjectsIndex({ subjects }: Props) {
                         </div>
                         <DialogFooter>
                             <DialogClose asChild>
-                                <Button variant="outline" type="button">Cancel</Button>
+                                <Button variant="outline" type="button">Annuler</Button>
                             </DialogClose>
                             <Button type="submit" disabled={editForm.processing}>
                                 {editForm.processing && <Spinner />}
-                                Save
+                                Enregistrer
                             </Button>
                         </DialogFooter>
                     </form>
@@ -173,7 +171,7 @@ export default function SubjectsIndex({ subjects }: Props) {
 SubjectsIndex.layout = {
     breadcrumbs: [
         {
-            title: 'Subjects',
+            title: 'Matières',
             href: index.url(),
         },
     ],

@@ -30,8 +30,8 @@ export default function EditStudent({ student, levels, subjects }: Props) {
 
     return (
         <>
-            <Head title={`Edit ${s.full_name}`} />
-            <h1 className="text-2xl font-semibold mb-6">Edit {s.full_name}</h1>
+            <Head title={`Modifier ${s.full_name}`} />
+            <h1 className="text-2xl font-semibold mb-6">Modifier {s.full_name}</h1>
             <StudentForm
                 data={form.data}
                 errors={form.errors}
@@ -40,7 +40,7 @@ export default function EditStudent({ student, levels, subjects }: Props) {
                 subjects={subjects}
                 setData={form.setData}
                 onSubmit={handleSubmit}
-                submitLabel="Save Changes"
+                submitLabel="Enregistrer"
             />
         </>
     );
@@ -48,7 +48,7 @@ export default function EditStudent({ student, levels, subjects }: Props) {
 
 EditStudent.layout = {
     breadcrumbs: [
-        { title: 'Students', href: index.url() },
-        { title: 'Edit Student', href: '#' },
+        { title: 'Élèves', href: index.url() },
+        { title: 'Modifier l\'élève', href: '#' },
     ],
 };

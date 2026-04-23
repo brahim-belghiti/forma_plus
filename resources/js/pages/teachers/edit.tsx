@@ -29,8 +29,8 @@ export default function EditTeacher({ teacher, levels, subjects }: Props) {
 
     return (
         <>
-            <Head title={`Edit ${t.full_name}`} />
-            <h1 className="text-2xl font-semibold mb-6">Edit {t.full_name}</h1>
+            <Head title={`Modifier ${t.full_name}`} />
+            <h1 className="text-2xl font-semibold mb-6">Modifier {t.full_name}</h1>
             <TeacherForm
                 data={form.data}
                 errors={form.errors}
@@ -39,7 +39,7 @@ export default function EditTeacher({ teacher, levels, subjects }: Props) {
                 subjects={subjects}
                 setData={form.setData}
                 onSubmit={handleSubmit}
-                submitLabel="Save Changes"
+                submitLabel="Enregistrer"
             />
         </>
     );
@@ -47,7 +47,7 @@ export default function EditTeacher({ teacher, levels, subjects }: Props) {
 
 EditTeacher.layout = {
     breadcrumbs: [
-        { title: 'Teachers', href: index.url() },
-        { title: 'Edit Teacher', href: '#' },
+        { title: 'Professeurs', href: index.url() },
+        { title: 'Modifier le professeur', href: '#' },
     ],
 };

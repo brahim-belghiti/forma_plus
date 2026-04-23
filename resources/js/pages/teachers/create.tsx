@@ -26,8 +26,8 @@ export default function CreateTeacher({ levels, subjects }: Props) {
 
     return (
         <>
-            <Head title="Add Teacher" />
-            <h1 className="text-2xl font-semibold mb-6">Add Teacher</h1>
+            <Head title="Ajouter un professeur" />
+            <h1 className="text-2xl font-semibold mb-6">Ajouter un professeur</h1>
             <TeacherForm
                 data={form.data}
                 errors={form.errors}
@@ -36,7 +36,7 @@ export default function CreateTeacher({ levels, subjects }: Props) {
                 subjects={subjects}
                 setData={form.setData}
                 onSubmit={handleSubmit}
-                submitLabel="Create Teacher"
+                submitLabel="Créer le professeur"
             />
         </>
     );
@@ -44,7 +44,7 @@ export default function CreateTeacher({ levels, subjects }: Props) {
 
 CreateTeacher.layout = {
     breadcrumbs: [
-        { title: 'Teachers', href: index.url() },
-        { title: 'Add Teacher', href: '#' },
+        { title: 'Professeurs', href: index.url() },
+        { title: 'Ajouter un professeur', href: '#' },
     ],
 };

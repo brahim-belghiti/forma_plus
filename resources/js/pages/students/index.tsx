@@ -28,36 +28,36 @@ export default function StudentsIndex({ students, levels, filters }: Props) {
     }
 
     function handleDelete(student: Student) {
-        if (!confirm(`Are you sure you want to delete "${student.full_name}"?`)) return;
+        if (!confirm(`Voulez-vous vraiment supprimer « ${student.full_name} » ?`)) return;
         router.delete(destroy.url(student.id));
     }
 
     return (
         <>
-            <Head title="Students" />
+            <Head title="Élèves" />
             <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-semibold">Students</h1>
+                <h1 className="text-2xl font-semibold">Élèves</h1>
                 <Button asChild>
                     <Link href={create.url()}>
                         <Plus className="mr-2 h-4 w-4" />
-                        Add Student
+                        Ajouter un élève
                     </Link>
                 </Button>
             </div>
 
             <div className="flex items-center gap-4 mb-4">
                 <Input
-                    placeholder="Search by name..."
+                    placeholder="Rechercher par nom..."
                     defaultValue={filters.search ?? ''}
                     onChange={(e) => handleSearch(e.target.value)}
                     className="max-w-sm"
                 />
                 <Select value={filters.level_id ?? 'all'} onValueChange={handleLevelFilter}>
                     <SelectTrigger className="w-48">
-                        <SelectValue placeholder="All levels" />
+                        <SelectValue placeholder="Tous les niveaux" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">All levels</SelectItem>
+                        <SelectItem value="all">Tous les niveaux</SelectItem>
                         {levels.data.map((level) => (
                             <SelectItem key={level.id} value={String(level.id)}>
                                 {level.name}
@@ -71,11 +71,11 @@ export default function StudentsIndex({ students, levels, filters }: Props) {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Level</TableHead>
-                            <TableHead>Subjects</TableHead>
-                            <TableHead>Guardian</TableHead>
-                            <TableHead>Phone</TableHead>
+                            <TableHead>Nom</TableHead>
+                            <TableHead>Niveau</TableHead>
+                            <TableHead>Matières</TableHead>
+                            <TableHead>Tuteur</TableHead>
+                            <TableHead>Téléphone</TableHead>
                             <TableHead className="w-24"></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -83,7 +83,7 @@ export default function StudentsIndex({ students, levels, filters }: Props) {
                         {students.data.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                                    No students found.
+                                    Aucun élève trouvé.
                                 </TableCell>
                             </TableRow>
                         ) : (
@@ -121,11 +121,10 @@ export default function StudentsIndex({ students, levels, filters }: Props) {
                 </Table>
             </div>
 
-            {/* Pagination */}
             {students.meta.last_page > 1 && (
                 <div className="flex items-center justify-between mt-4">
                     <p className="text-sm text-muted-foreground">
-                        Showing {students.meta.from} to {students.meta.to} of {students.meta.total} students
+                        Affichage de {students.meta.from} à {students.meta.to} sur {students.meta.total} élèves
                     </p>
                     <div className="flex gap-1">
                         {students.meta.links.map((link, i) => (
@@ -148,7 +147,7 @@ export default function StudentsIndex({ students, levels, filters }: Props) {
 StudentsIndex.layout = {
     breadcrumbs: [
         {
-            title: 'Students',
+            title: 'Élèves',
             href: index.url(),
         },
     ],

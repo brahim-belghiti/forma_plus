@@ -19,26 +19,26 @@ export default function TeachersIndex({ teachers, filters }: Props) {
     }, 300);
 
     function handleDelete(teacher: Teacher) {
-        if (!confirm(`Are you sure you want to delete "${teacher.full_name}"?`)) return;
+        if (!confirm(`Voulez-vous vraiment supprimer « ${teacher.full_name} » ?`)) return;
         router.delete(destroy.url(teacher.id));
     }
 
     return (
         <>
-            <Head title="Teachers" />
+            <Head title="Professeurs" />
             <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-semibold">Teachers</h1>
+                <h1 className="text-2xl font-semibold">Professeurs</h1>
                 <Button asChild>
                     <Link href={create.url()}>
                         <Plus className="mr-2 h-4 w-4" />
-                        Add Teacher
+                        Ajouter un professeur
                     </Link>
                 </Button>
             </div>
 
             <div className="flex items-center gap-4 mb-4">
                 <Input
-                    placeholder="Search by name..."
+                    placeholder="Rechercher par nom..."
                     defaultValue={filters.search ?? ''}
                     onChange={(e) => handleSearch(e.target.value)}
                     className="max-w-sm"
@@ -49,11 +49,11 @@ export default function TeachersIndex({ teachers, filters }: Props) {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Phone</TableHead>
-                            <TableHead>Subjects</TableHead>
-                            <TableHead>Levels</TableHead>
-                            <TableHead className="text-center">Salary Rate</TableHead>
+                            <TableHead>Nom</TableHead>
+                            <TableHead>Téléphone</TableHead>
+                            <TableHead>Matières</TableHead>
+                            <TableHead>Niveaux</TableHead>
+                            <TableHead className="text-center">Taux de salaire</TableHead>
                             <TableHead className="w-24"></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -61,7 +61,7 @@ export default function TeachersIndex({ teachers, filters }: Props) {
                         {teachers.data.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                                    No teachers found.
+                                    Aucun professeur trouvé.
                                 </TableCell>
                             </TableRow>
                         ) : (
@@ -86,7 +86,7 @@ export default function TeachersIndex({ teachers, filters }: Props) {
                                     <TableCell className="text-center">
                                         {teacher.salary_rate
                                             ? `${teacher.salary_rate}%`
-                                            : `${teacher.effective_salary_rate}% (default)`}
+                                            : `${teacher.effective_salary_rate}% (défaut)`}
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-1 justify-end">
@@ -110,7 +110,7 @@ export default function TeachersIndex({ teachers, filters }: Props) {
             {teachers.meta.last_page > 1 && (
                 <div className="flex items-center justify-between mt-4">
                     <p className="text-sm text-muted-foreground">
-                        Showing {teachers.meta.from} to {teachers.meta.to} of {teachers.meta.total} teachers
+                        Affichage de {teachers.meta.from} à {teachers.meta.to} sur {teachers.meta.total} professeurs
                     </p>
                     <div className="flex gap-1">
                         {teachers.meta.links.map((link, i) => (
@@ -132,6 +132,6 @@ export default function TeachersIndex({ teachers, filters }: Props) {
 
 TeachersIndex.layout = {
     breadcrumbs: [
-        { title: 'Teachers', href: index.url() },
+        { title: 'Professeurs', href: index.url() },
     ],
 };

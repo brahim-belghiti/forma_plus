@@ -27,52 +27,52 @@ import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
+        title: 'Tableau de bord',
         href: dashboard(),
         icon: LayoutGrid,
     },
     {
-        title: 'Levels',
+        title: 'Niveaux',
         href: levelsIndex.url(),
         icon: Layers,
     },
     {
-        title: 'Subjects',
+        title: 'Matières',
         href: subjectsIndex.url(),
         icon: GraduationCap,
     },
     {
-        title: 'Students',
+        title: 'Élèves',
         href: studentsIndex.url(),
         icon: Users,
     },
     {
-        title: 'Teachers',
+        title: 'Professeurs',
         href: teachersIndex.url(),
         icon: UserCheck,
     },
     {
-        title: 'Classrooms',
+        title: 'Salles',
         href: classroomsIndex.url(),
         icon: DoorOpen,
     },
     {
-        title: 'Schedule',
+        title: 'Emploi du temps',
         href: timeslotsIndex.url(),
         icon: Calendar,
     },
     {
-        title: 'Payments',
+        title: 'Paiements',
         href: paymentsIndex.url(),
         icon: CreditCard,
     },
     {
-        title: 'Salaries',
+        title: 'Salaires',
         href: salariesIndex.url(),
         icon: Banknote,
     },
     {
-        title: 'Expenses',
+        title: 'Dépenses',
         href: expensesIndex.url(),
         icon: Receipt,
     },
@@ -80,7 +80,7 @@ const mainNavItems: NavItem[] = [
 
 const footerNavItems: NavItem[] = [
     {
-        title: 'Repository',
+        title: 'Dépôt',
         href: 'https://github.com/laravel/react-starter-kit',
         icon: FolderGit2,
     },

@@ -15,7 +15,7 @@ type Props = {
 };
 
 function formatCurrency(value: number): string {
-    return value.toFixed(2) + ' DH';
+    return value.toFixed(2).replace('.', ',') + ' DH';
 }
 
 export default function Dashboard({ stats }: Props) {
@@ -23,14 +23,14 @@ export default function Dashboard({ stats }: Props) {
 
     return (
         <>
-            <Head title="Dashboard" />
+            <Head title="Tableau de bord" />
             <div className="flex flex-col gap-6">
-                <h1 className="text-2xl font-semibold">Dashboard</h1>
+                <h1 className="text-2xl font-semibold">Tableau de bord</h1>
 
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Students</CardTitle>
+                            <CardTitle className="text-sm font-medium">Élèves</CardTitle>
                             <Users className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
@@ -40,7 +40,7 @@ export default function Dashboard({ stats }: Props) {
 
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Teachers</CardTitle>
+                            <CardTitle className="text-sm font-medium">Professeurs</CardTitle>
                             <UserCheck className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
@@ -50,7 +50,7 @@ export default function Dashboard({ stats }: Props) {
 
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Payments</CardTitle>
+                            <CardTitle className="text-sm font-medium">Total des paiements</CardTitle>
                             <CreditCard className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
@@ -60,7 +60,7 @@ export default function Dashboard({ stats }: Props) {
 
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Salaries</CardTitle>
+                            <CardTitle className="text-sm font-medium">Total des salaires</CardTitle>
                             <Banknote className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
@@ -70,7 +70,7 @@ export default function Dashboard({ stats }: Props) {
 
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
+                            <CardTitle className="text-sm font-medium">Total des dépenses</CardTitle>
                             <Receipt className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
@@ -80,7 +80,7 @@ export default function Dashboard({ stats }: Props) {
 
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Balance</CardTitle>
+                            <CardTitle className="text-sm font-medium">Solde</CardTitle>
                             {isPositive ? (
                                 <TrendingUp className="h-4 w-4 text-green-600" />
                             ) : (
@@ -92,7 +92,7 @@ export default function Dashboard({ stats }: Props) {
                                 {formatCurrency(stats.balance)}
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
-                                Payments - Salaries - Expenses
+                                Paiements − Salaires − Dépenses
                             </p>
                         </CardContent>
                     </Card>
@@ -105,7 +105,7 @@ export default function Dashboard({ stats }: Props) {
 Dashboard.layout = {
     breadcrumbs: [
         {
-            title: 'Dashboard',
+            title: 'Tableau de bord',
             href: dashboard(),
         },
     ],

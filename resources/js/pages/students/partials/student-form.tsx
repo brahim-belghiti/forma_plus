@@ -41,7 +41,7 @@ export default function StudentForm({ data, errors, processing, levels, subjects
         <form onSubmit={onSubmit} className="space-y-6 max-w-2xl">
             <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                    <Label htmlFor="first_name">First name</Label>
+                    <Label htmlFor="first_name">Prénom</Label>
                     <Input
                         id="first_name"
                         value={data.first_name}
@@ -52,7 +52,7 @@ export default function StudentForm({ data, errors, processing, levels, subjects
                     <InputError message={errors.first_name} />
                 </div>
                 <div className="grid gap-2">
-                    <Label htmlFor="last_name">Last name</Label>
+                    <Label htmlFor="last_name">Nom</Label>
                     <Input
                         id="last_name"
                         value={data.last_name}
@@ -64,7 +64,7 @@ export default function StudentForm({ data, errors, processing, levels, subjects
             </div>
 
             <div className="grid gap-2">
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone">Téléphone</Label>
                 <Input
                     id="phone"
                     value={data.phone}
@@ -75,7 +75,7 @@ export default function StudentForm({ data, errors, processing, levels, subjects
 
             <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                    <Label htmlFor="guardian_name">Guardian name</Label>
+                    <Label htmlFor="guardian_name">Nom du tuteur</Label>
                     <Input
                         id="guardian_name"
                         value={data.guardian_name}
@@ -84,7 +84,7 @@ export default function StudentForm({ data, errors, processing, levels, subjects
                     <InputError message={errors.guardian_name} />
                 </div>
                 <div className="grid gap-2">
-                    <Label htmlFor="guardian_phone">Guardian phone</Label>
+                    <Label htmlFor="guardian_phone">Téléphone du tuteur</Label>
                     <Input
                         id="guardian_phone"
                         value={data.guardian_phone}
@@ -95,10 +95,10 @@ export default function StudentForm({ data, errors, processing, levels, subjects
             </div>
 
             <div className="grid gap-2">
-                <Label>Level</Label>
+                <Label>Niveau</Label>
                 <Select value={data.level_id} onValueChange={(value) => setData('level_id', value)}>
                     <SelectTrigger>
-                        <SelectValue placeholder="Select a level" />
+                        <SelectValue placeholder="Sélectionner un niveau" />
                     </SelectTrigger>
                     <SelectContent>
                         {levels.data.map((level) => (
@@ -112,10 +112,10 @@ export default function StudentForm({ data, errors, processing, levels, subjects
             </div>
 
             <div className="grid gap-2">
-                <Label>Subjects</Label>
+                <Label>Matières</Label>
                 <div className="grid grid-cols-2 gap-2 rounded-lg border p-4">
                     {subjects.data.length === 0 ? (
-                        <p className="text-sm text-muted-foreground col-span-2">No subjects available. Create subjects first.</p>
+                        <p className="text-sm text-muted-foreground col-span-2">Aucune matière disponible. Créez d'abord des matières.</p>
                     ) : (
                         subjects.data.map((subject) => (
                             <label key={subject.id} className="flex items-center gap-2 cursor-pointer">

@@ -15,18 +15,18 @@ import { Pencil, Trash2, Plus } from 'lucide-react';
 import { useDebouncedCallback } from '@/hooks/use-debounced-callback';
 
 const MONTHS = [
-    { value: 1, label: 'January' },
-    { value: 2, label: 'February' },
-    { value: 3, label: 'March' },
-    { value: 4, label: 'April' },
-    { value: 5, label: 'May' },
-    { value: 6, label: 'June' },
-    { value: 7, label: 'July' },
-    { value: 8, label: 'August' },
-    { value: 9, label: 'September' },
-    { value: 10, label: 'October' },
-    { value: 11, label: 'November' },
-    { value: 12, label: 'December' },
+    { value: 1, label: 'Janvier' },
+    { value: 2, label: 'Février' },
+    { value: 3, label: 'Mars' },
+    { value: 4, label: 'Avril' },
+    { value: 5, label: 'Mai' },
+    { value: 6, label: 'Juin' },
+    { value: 7, label: 'Juillet' },
+    { value: 8, label: 'Août' },
+    { value: 9, label: 'Septembre' },
+    { value: 10, label: 'Octobre' },
+    { value: 11, label: 'Novembre' },
+    { value: 12, label: 'Décembre' },
 ];
 
 type Props = {
@@ -108,7 +108,7 @@ export default function SalariesIndex({ salaries, teachers, filters }: Props) {
     }
 
     function handleDelete(salary: Salary) {
-        if (!confirm('Are you sure you want to delete this salary record?')) return;
+        if (!confirm('Voulez-vous vraiment supprimer cet enregistrement de salaire ?')) return;
         router.delete(destroy.url(salary.id));
     }
 
@@ -132,28 +132,28 @@ export default function SalariesIndex({ salaries, teachers, filters }: Props) {
 
     return (
         <>
-            <Head title="Salaries" />
+            <Head title="Salaires" />
             <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-semibold">Salaries</h1>
+                <h1 className="text-2xl font-semibold">Salaires</h1>
                 <Button onClick={() => setShowCreate(true)}>
                     <Plus className="mr-2 h-4 w-4" />
-                    Log Salary
+                    Enregistrer un salaire
                 </Button>
             </div>
 
             <div className="flex items-center gap-4 mb-4">
                 <Input
-                    placeholder="Search by teacher name..."
+                    placeholder="Rechercher par nom de professeur..."
                     defaultValue={filters.search ?? ''}
                     onChange={(e) => handleSearch(e.target.value)}
                     className="max-w-sm"
                 />
                 <Select value={filters.month ?? 'all'} onValueChange={handleMonthFilter}>
                     <SelectTrigger className="w-40">
-                        <SelectValue placeholder="All months" />
+                        <SelectValue placeholder="Tous les mois" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">All months</SelectItem>
+                        <SelectItem value="all">Tous les mois</SelectItem>
                         {MONTHS.map((m) => (
                             <SelectItem key={m.value} value={String(m.value)}>
                                 {m.label}
@@ -181,11 +181,11 @@ export default function SalariesIndex({ salaries, teachers, filters }: Props) {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Teacher</TableHead>
-                            <TableHead>Period</TableHead>
-                            <TableHead>Amount</TableHead>
-                            <TableHead>Paid On</TableHead>
-                            <TableHead>Notes</TableHead>
+                            <TableHead>Professeur</TableHead>
+                            <TableHead>Période</TableHead>
+                            <TableHead>Montant</TableHead>
+                            <TableHead>Payé le</TableHead>
+                            <TableHead>Remarques</TableHead>
                             <TableHead className="w-24"></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -193,7 +193,7 @@ export default function SalariesIndex({ salaries, teachers, filters }: Props) {
                         {salaries.data.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                                    No salary records found.
+                                    Aucun enregistrement de salaire trouvé.
                                 </TableCell>
                             </TableRow>
                         ) : (
@@ -201,7 +201,7 @@ export default function SalariesIndex({ salaries, teachers, filters }: Props) {
                                 <TableRow key={salary.id}>
                                     <TableCell className="font-medium">{salary.teacher?.full_name}</TableCell>
                                     <TableCell>{monthLabel(salary.period_month)} {salary.period_year}</TableCell>
-                                    <TableCell>{Number(salary.amount).toFixed(2)} DH</TableCell>
+                                    <TableCell>{Number(salary.amount).toFixed(2).replace('.', ',')} DH</TableCell>
                                     <TableCell>{salary.paid_at}</TableCell>
                                     <TableCell className="max-w-xs truncate">{salary.notes ?? '-'}</TableCell>
                                     <TableCell>
@@ -224,7 +224,7 @@ export default function SalariesIndex({ salaries, teachers, filters }: Props) {
             {salaries.meta.last_page > 1 && (
                 <div className="flex items-center justify-between mt-4">
                     <p className="text-sm text-muted-foreground">
-                        Showing {salaries.meta.from} to {salaries.meta.to} of {salaries.meta.total} records
+                        Affichage de {salaries.meta.from} à {salaries.meta.to} sur {salaries.meta.total} enregistrements
                     </p>
                     <div className="flex gap-1">
                         {salaries.meta.links.map((link, i) => (
@@ -244,13 +244,13 @@ export default function SalariesIndex({ salaries, teachers, filters }: Props) {
             <Dialog open={showCreate} onOpenChange={setShowCreate}>
                 <DialogContent className="sm:max-w-lg">
                     <DialogHeader>
-                        <DialogTitle>Log Salary</DialogTitle>
+                        <DialogTitle>Enregistrer un salaire</DialogTitle>
                     </DialogHeader>
                     <SalaryForm
                         form={createForm}
                         onSubmit={handleCreate}
                         teachers={teachers.data}
-                        submitLabel="Create"
+                        submitLabel="Créer"
                     />
                 </DialogContent>
             </Dialog>
@@ -258,13 +258,13 @@ export default function SalariesIndex({ salaries, teachers, filters }: Props) {
             <Dialog open={!!editingSalary} onOpenChange={(open) => !open && setEditingSalary(null)}>
                 <DialogContent className="sm:max-w-lg">
                     <DialogHeader>
-                        <DialogTitle>Edit Salary</DialogTitle>
+                        <DialogTitle>Modifier le salaire</DialogTitle>
                     </DialogHeader>
                     <SalaryForm
                         form={editForm}
                         onSubmit={handleEdit}
                         teachers={teachers.data}
-                        submitLabel="Save"
+                        submitLabel="Enregistrer"
                     />
                 </DialogContent>
             </Dialog>
@@ -286,10 +286,10 @@ function SalaryForm({ form, onSubmit, teachers, submitLabel }: SalaryFormProps) 
         <form onSubmit={onSubmit}>
             <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                    <Label>Teacher</Label>
+                    <Label>Professeur</Label>
                     <Select value={form.data.teacher_id} onValueChange={(v) => form.setData('teacher_id', v)}>
                         <SelectTrigger>
-                            <SelectValue placeholder="Select teacher" />
+                            <SelectValue placeholder="Sélectionner un professeur" />
                         </SelectTrigger>
                         <SelectContent>
                             {teachers.map((teacher) => (
@@ -303,7 +303,7 @@ function SalaryForm({ form, onSubmit, teachers, submitLabel }: SalaryFormProps) 
                 </div>
 
                 <div className="grid gap-2">
-                    <Label>Amount (DH)</Label>
+                    <Label>Montant (DH)</Label>
                     <Input
                         type="number"
                         step="0.01"
@@ -317,10 +317,10 @@ function SalaryForm({ form, onSubmit, teachers, submitLabel }: SalaryFormProps) 
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="grid gap-2">
-                        <Label>Period Month</Label>
+                        <Label>Mois</Label>
                         <Select value={form.data.period_month} onValueChange={(v) => form.setData('period_month', v)}>
                             <SelectTrigger>
-                                <SelectValue placeholder="Month" />
+                                <SelectValue placeholder="Mois" />
                             </SelectTrigger>
                             <SelectContent>
                                 {MONTHS.map((m) => (
@@ -333,10 +333,10 @@ function SalaryForm({ form, onSubmit, teachers, submitLabel }: SalaryFormProps) 
                         <InputError message={form.errors.period_month} />
                     </div>
                     <div className="grid gap-2">
-                        <Label>Period Year</Label>
+                        <Label>Année</Label>
                         <Select value={form.data.period_year} onValueChange={(v) => form.setData('period_year', v)}>
                             <SelectTrigger>
-                                <SelectValue placeholder="Year" />
+                                <SelectValue placeholder="Année" />
                             </SelectTrigger>
                             <SelectContent>
                                 {yearOptions.map((y) => (
@@ -351,7 +351,7 @@ function SalaryForm({ form, onSubmit, teachers, submitLabel }: SalaryFormProps) 
                 </div>
 
                 <div className="grid gap-2">
-                    <Label>Paid On</Label>
+                    <Label>Payé le</Label>
                     <Input
                         type="date"
                         value={form.data.paid_at}
@@ -361,11 +361,11 @@ function SalaryForm({ form, onSubmit, teachers, submitLabel }: SalaryFormProps) 
                 </div>
 
                 <div className="grid gap-2">
-                    <Label>Notes</Label>
+                    <Label>Remarques</Label>
                     <Textarea
                         value={form.data.notes}
                         onChange={(e) => form.setData('notes', e.target.value)}
-                        placeholder="Optional notes..."
+                        placeholder="Remarques facultatives..."
                         rows={2}
                     />
                     <InputError message={form.errors.notes} />
@@ -373,7 +373,7 @@ function SalaryForm({ form, onSubmit, teachers, submitLabel }: SalaryFormProps) 
             </div>
             <DialogFooter>
                 <DialogClose asChild>
-                    <Button variant="outline" type="button">Cancel</Button>
+                    <Button variant="outline" type="button">Annuler</Button>
                 </DialogClose>
                 <Button type="submit" disabled={form.processing}>
                     {form.processing && <Spinner />}
@@ -386,6 +386,6 @@ function SalaryForm({ form, onSubmit, teachers, submitLabel }: SalaryFormProps) 
 
 SalariesIndex.layout = {
     breadcrumbs: [
-        { title: 'Salaries', href: index.url() },
+        { title: 'Salaires', href: index.url() },
     ],
 };

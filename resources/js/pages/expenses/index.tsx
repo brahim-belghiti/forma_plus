@@ -72,7 +72,7 @@ export default function ExpensesIndex({ expenses, filters }: Props) {
     }
 
     function handleDelete(expense: Expense) {
-        if (!confirm(`Are you sure you want to delete "${expense.description}"?`)) return;
+        if (!confirm(`Voulez-vous vraiment supprimer « ${expense.description} » ?`)) return;
         router.delete(destroy.url(expense.id));
     }
 
@@ -88,18 +88,18 @@ export default function ExpensesIndex({ expenses, filters }: Props) {
 
     return (
         <>
-            <Head title="Expenses" />
+            <Head title="Dépenses" />
             <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-semibold">Expenses</h1>
+                <h1 className="text-2xl font-semibold">Dépenses</h1>
                 <Button onClick={() => setShowCreate(true)}>
                     <Plus className="mr-2 h-4 w-4" />
-                    Add Expense
+                    Ajouter une dépense
                 </Button>
             </div>
 
             <div className="flex items-center gap-4 mb-4">
                 <Input
-                    placeholder="Search by description..."
+                    placeholder="Rechercher par description..."
                     defaultValue={filters.search ?? ''}
                     onChange={(e) => handleSearch(e.target.value)}
                     className="max-w-sm"
@@ -111,9 +111,9 @@ export default function ExpensesIndex({ expenses, filters }: Props) {
                     <TableHeader>
                         <TableRow>
                             <TableHead>Description</TableHead>
-                            <TableHead>Amount</TableHead>
+                            <TableHead>Montant</TableHead>
                             <TableHead>Date</TableHead>
-                            <TableHead>Notes</TableHead>
+                            <TableHead>Remarques</TableHead>
                             <TableHead className="w-24"></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -121,14 +121,14 @@ export default function ExpensesIndex({ expenses, filters }: Props) {
                         {expenses.data.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                                    No expenses found.
+                                    Aucune dépense trouvée.
                                 </TableCell>
                             </TableRow>
                         ) : (
                             expenses.data.map((expense) => (
                                 <TableRow key={expense.id}>
                                     <TableCell className="font-medium">{expense.description}</TableCell>
-                                    <TableCell>{Number(expense.amount).toFixed(2)} DH</TableCell>
+                                    <TableCell>{Number(expense.amount).toFixed(2).replace('.', ',')} DH</TableCell>
                                     <TableCell>{expense.spent_at}</TableCell>
                                     <TableCell className="max-w-xs truncate">{expense.notes ?? '-'}</TableCell>
                                     <TableCell>
@@ -151,7 +151,7 @@ export default function ExpensesIndex({ expenses, filters }: Props) {
             {expenses.meta.last_page > 1 && (
                 <div className="flex items-center justify-between mt-4">
                     <p className="text-sm text-muted-foreground">
-                        Showing {expenses.meta.from} to {expenses.meta.to} of {expenses.meta.total} expenses
+                        Affichage de {expenses.meta.from} à {expenses.meta.to} sur {expenses.meta.total} dépenses
                     </p>
                     <div className="flex gap-1">
                         {expenses.meta.links.map((link, i) => (
@@ -171,17 +171,17 @@ export default function ExpensesIndex({ expenses, filters }: Props) {
             <Dialog open={showCreate} onOpenChange={setShowCreate}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Add Expense</DialogTitle>
+                        <DialogTitle>Ajouter une dépense</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleCreate}>
                         <ExpenseFormFields form={createForm} />
                         <DialogFooter>
                             <DialogClose asChild>
-                                <Button variant="outline" type="button">Cancel</Button>
+                                <Button variant="outline" type="button">Annuler</Button>
                             </DialogClose>
                             <Button type="submit" disabled={createForm.processing}>
                                 {createForm.processing && <Spinner />}
-                                Create
+                                Créer
                             </Button>
                         </DialogFooter>
                     </form>
@@ -191,17 +191,17 @@ export default function ExpensesIndex({ expenses, filters }: Props) {
             <Dialog open={!!editingExpense} onOpenChange={(open) => !open && setEditingExpense(null)}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Edit Expense</DialogTitle>
+                        <DialogTitle>Modifier la dépense</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleEdit}>
                         <ExpenseFormFields form={editForm} />
                         <DialogFooter>
                             <DialogClose asChild>
-                                <Button variant="outline" type="button">Cancel</Button>
+                                <Button variant="outline" type="button">Annuler</Button>
                             </DialogClose>
                             <Button type="submit" disabled={editForm.processing}>
                                 {editForm.processing && <Spinner />}
-                                Save
+                                Enregistrer
                             </Button>
                         </DialogFooter>
                     </form>
@@ -219,14 +219,14 @@ function ExpenseFormFields({ form }: { form: ReturnType<typeof useForm<ExpenseFo
                 <Input
                     value={form.data.description}
                     onChange={(e) => form.setData('description', e.target.value)}
-                    placeholder="e.g. Office supplies"
+                    placeholder="ex : Fournitures de bureau"
                     autoFocus
                 />
                 <InputError message={form.errors.description} />
             </div>
 
             <div className="grid gap-2">
-                <Label>Amount (DH)</Label>
+                <Label>Montant (DH)</Label>
                 <Input
                     type="number"
                     step="0.01"
@@ -249,11 +249,11 @@ function ExpenseFormFields({ form }: { form: ReturnType<typeof useForm<ExpenseFo
             </div>
 
             <div className="grid gap-2">
-                <Label>Notes</Label>
+                <Label>Remarques</Label>
                 <Textarea
                     value={form.data.notes}
                     onChange={(e) => form.setData('notes', e.target.value)}
-                    placeholder="Optional notes..."
+                    placeholder="Remarques facultatives..."
                     rows={2}
                 />
                 <InputError message={form.errors.notes} />
@@ -264,6 +264,6 @@ function ExpenseFormFields({ form }: { form: ReturnType<typeof useForm<ExpenseFo
 
 ExpensesIndex.layout = {
     breadcrumbs: [
-        { title: 'Expenses', href: index.url() },
+        { title: 'Dépenses', href: index.url() },
     ],
 };

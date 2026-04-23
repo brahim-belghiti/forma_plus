@@ -44,7 +44,7 @@ export default function LevelsIndex({ levels }: Props) {
     }
 
     function handleDelete(level: Level) {
-        if (!confirm(`Are you sure you want to delete "${level.name}"?`)) return;
+        if (!confirm(`Voulez-vous vraiment supprimer « ${level.name} » ?`)) return;
         router.delete(destroy.url(level.id));
     }
 
@@ -55,12 +55,12 @@ export default function LevelsIndex({ levels }: Props) {
 
     return (
         <>
-            <Head title="Levels" />
+            <Head title="Niveaux" />
             <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-semibold">Levels</h1>
+                <h1 className="text-2xl font-semibold">Niveaux</h1>
                 <Button onClick={() => setShowCreate(true)}>
                     <Plus className="mr-2 h-4 w-4" />
-                    Add Level
+                    Ajouter un niveau
                 </Button>
             </div>
 
@@ -68,8 +68,8 @@ export default function LevelsIndex({ levels }: Props) {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead className="w-32 text-center">Subjects</TableHead>
+                            <TableHead>Nom</TableHead>
+                            <TableHead className="w-32 text-center">Matières</TableHead>
                             <TableHead className="w-24"></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -77,7 +77,7 @@ export default function LevelsIndex({ levels }: Props) {
                         {levels.data.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
-                                    No levels yet. Add your first level to get started.
+                                    Aucun niveau pour l'instant. Ajoutez votre premier niveau pour commencer.
                                 </TableCell>
                             </TableRow>
                         ) : (
@@ -102,21 +102,20 @@ export default function LevelsIndex({ levels }: Props) {
                 </Table>
             </div>
 
-            {/* Create Dialog */}
             <Dialog open={showCreate} onOpenChange={setShowCreate}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Add Level</DialogTitle>
+                        <DialogTitle>Ajouter un niveau</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleCreate}>
                         <div className="grid gap-4 py-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="create-name">Name</Label>
+                                <Label htmlFor="create-name">Nom</Label>
                                 <Input
                                     id="create-name"
                                     value={createForm.data.name}
                                     onChange={(e) => createForm.setData('name', e.target.value)}
-                                    placeholder="e.g. 2eme Bac"
+                                    placeholder="ex : 2ème Bac"
                                     autoFocus
                                 />
                                 <InputError message={createForm.errors.name} />
@@ -124,27 +123,26 @@ export default function LevelsIndex({ levels }: Props) {
                         </div>
                         <DialogFooter>
                             <DialogClose asChild>
-                                <Button variant="outline" type="button">Cancel</Button>
+                                <Button variant="outline" type="button">Annuler</Button>
                             </DialogClose>
                             <Button type="submit" disabled={createForm.processing}>
                                 {createForm.processing && <Spinner />}
-                                Create
+                                Créer
                             </Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>
             </Dialog>
 
-            {/* Edit Dialog */}
             <Dialog open={!!editingLevel} onOpenChange={(open) => !open && setEditingLevel(null)}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Edit Level</DialogTitle>
+                        <DialogTitle>Modifier le niveau</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleEdit}>
                         <div className="grid gap-4 py-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="edit-name">Name</Label>
+                                <Label htmlFor="edit-name">Nom</Label>
                                 <Input
                                     id="edit-name"
                                     value={editForm.data.name}
@@ -156,11 +154,11 @@ export default function LevelsIndex({ levels }: Props) {
                         </div>
                         <DialogFooter>
                             <DialogClose asChild>
-                                <Button variant="outline" type="button">Cancel</Button>
+                                <Button variant="outline" type="button">Annuler</Button>
                             </DialogClose>
                             <Button type="submit" disabled={editForm.processing}>
                                 {editForm.processing && <Spinner />}
-                                Save
+                                Enregistrer
                             </Button>
                         </DialogFooter>
                     </form>
@@ -173,7 +171,7 @@ export default function LevelsIndex({ levels }: Props) {
 LevelsIndex.layout = {
     breadcrumbs: [
         {
-            title: 'Levels',
+            title: 'Niveaux',
             href: index.url(),
         },
     ],

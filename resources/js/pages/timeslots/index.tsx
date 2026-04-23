@@ -13,13 +13,13 @@ import type { Timeslot, Teacher, Subject, Level, Classroom } from '@/types';
 import { Pencil, Trash2, Plus } from 'lucide-react';
 
 const DAYS_OF_WEEK = [
-    { value: 1, label: 'Monday' },
-    { value: 2, label: 'Tuesday' },
-    { value: 3, label: 'Wednesday' },
-    { value: 4, label: 'Thursday' },
-    { value: 5, label: 'Friday' },
-    { value: 6, label: 'Saturday' },
-    { value: 0, label: 'Sunday' },
+    { value: 1, label: 'Lundi' },
+    { value: 2, label: 'Mardi' },
+    { value: 3, label: 'Mercredi' },
+    { value: 4, label: 'Jeudi' },
+    { value: 5, label: 'Vendredi' },
+    { value: 6, label: 'Samedi' },
+    { value: 0, label: 'Dimanche' },
 ];
 
 type Props = {
@@ -79,7 +79,7 @@ export default function TimeslotsIndex({ timeslots, teachers, subjects, levels, 
     }
 
     function handleDelete(timeslot: Timeslot) {
-        if (!confirm('Are you sure you want to delete this timeslot?')) return;
+        if (!confirm('Voulez-vous vraiment supprimer ce créneau ?')) return;
         router.delete(destroy.url(timeslot.id));
     }
 
@@ -103,18 +103,18 @@ export default function TimeslotsIndex({ timeslots, teachers, subjects, levels, 
 
     return (
         <>
-            <Head title="Schedule" />
+            <Head title="Emploi du temps" />
             <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-semibold">Schedule</h1>
+                <h1 className="text-2xl font-semibold">Emploi du temps</h1>
                 <Button onClick={() => setShowCreate(true)}>
                     <Plus className="mr-2 h-4 w-4" />
-                    Add Timeslot
+                    Ajouter un créneau
                 </Button>
             </div>
 
             {timeslots.data.length === 0 ? (
                 <div className="rounded-lg border p-8 text-center text-muted-foreground">
-                    No timeslots yet. Add your first timeslot to build your schedule.
+                    Aucun créneau pour l'instant. Ajoutez votre premier créneau pour construire l'emploi du temps.
                 </div>
             ) : (
                 <div className="space-y-6">
@@ -126,11 +126,11 @@ export default function TimeslotsIndex({ timeslots, teachers, subjects, levels, 
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Time</TableHead>
-                                        <TableHead>Teacher</TableHead>
-                                        <TableHead>Subject</TableHead>
-                                        <TableHead>Level</TableHead>
-                                        <TableHead>Classroom</TableHead>
+                                        <TableHead>Horaire</TableHead>
+                                        <TableHead>Professeur</TableHead>
+                                        <TableHead>Matière</TableHead>
+                                        <TableHead>Niveau</TableHead>
+                                        <TableHead>Salle</TableHead>
                                         <TableHead className="w-24"></TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -166,7 +166,7 @@ export default function TimeslotsIndex({ timeslots, teachers, subjects, levels, 
             <Dialog open={showCreate} onOpenChange={setShowCreate}>
                 <DialogContent className="sm:max-w-lg">
                     <DialogHeader>
-                        <DialogTitle>Add Timeslot</DialogTitle>
+                        <DialogTitle>Ajouter un créneau</DialogTitle>
                     </DialogHeader>
                     <TimeslotForm
                         form={createForm}
@@ -175,7 +175,7 @@ export default function TimeslotsIndex({ timeslots, teachers, subjects, levels, 
                         subjects={subjects.data}
                         levels={levels.data}
                         classrooms={classrooms.data}
-                        submitLabel="Create"
+                        submitLabel="Créer"
                     />
                 </DialogContent>
             </Dialog>
@@ -183,7 +183,7 @@ export default function TimeslotsIndex({ timeslots, teachers, subjects, levels, 
             <Dialog open={!!editingTimeslot} onOpenChange={(open) => !open && setEditingTimeslot(null)}>
                 <DialogContent className="sm:max-w-lg">
                     <DialogHeader>
-                        <DialogTitle>Edit Timeslot</DialogTitle>
+                        <DialogTitle>Modifier le créneau</DialogTitle>
                     </DialogHeader>
                     <TimeslotForm
                         form={editForm}
@@ -192,7 +192,7 @@ export default function TimeslotsIndex({ timeslots, teachers, subjects, levels, 
                         subjects={subjects.data}
                         levels={levels.data}
                         classrooms={classrooms.data}
-                        submitLabel="Save"
+                        submitLabel="Enregistrer"
                     />
                 </DialogContent>
             </Dialog>
@@ -215,10 +215,10 @@ function TimeslotForm({ form, onSubmit, teachers, subjects, levels, classrooms, 
         <form onSubmit={onSubmit}>
             <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                    <Label>Day</Label>
+                    <Label>Jour</Label>
                     <Select value={form.data.day_of_week} onValueChange={(v) => form.setData('day_of_week', v)}>
                         <SelectTrigger>
-                            <SelectValue placeholder="Select day" />
+                            <SelectValue placeholder="Sélectionner un jour" />
                         </SelectTrigger>
                         <SelectContent>
                             {DAYS_OF_WEEK.map((day) => (
@@ -233,7 +233,7 @@ function TimeslotForm({ form, onSubmit, teachers, subjects, levels, classrooms, 
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="grid gap-2">
-                        <Label>Start Time</Label>
+                        <Label>Heure de début</Label>
                         <Input
                             type="time"
                             value={form.data.start_time}
@@ -242,7 +242,7 @@ function TimeslotForm({ form, onSubmit, teachers, subjects, levels, classrooms, 
                         <InputError message={form.errors.start_time} />
                     </div>
                     <div className="grid gap-2">
-                        <Label>End Time</Label>
+                        <Label>Heure de fin</Label>
                         <Input
                             type="time"
                             value={form.data.end_time}
@@ -253,10 +253,10 @@ function TimeslotForm({ form, onSubmit, teachers, subjects, levels, classrooms, 
                 </div>
 
                 <div className="grid gap-2">
-                    <Label>Teacher</Label>
+                    <Label>Professeur</Label>
                     <Select value={form.data.teacher_id} onValueChange={(v) => form.setData('teacher_id', v)}>
                         <SelectTrigger>
-                            <SelectValue placeholder="Select teacher" />
+                            <SelectValue placeholder="Sélectionner un professeur" />
                         </SelectTrigger>
                         <SelectContent>
                             {teachers.map((teacher) => (
@@ -270,10 +270,10 @@ function TimeslotForm({ form, onSubmit, teachers, subjects, levels, classrooms, 
                 </div>
 
                 <div className="grid gap-2">
-                    <Label>Subject</Label>
+                    <Label>Matière</Label>
                     <Select value={form.data.subject_id} onValueChange={(v) => form.setData('subject_id', v)}>
                         <SelectTrigger>
-                            <SelectValue placeholder="Select subject" />
+                            <SelectValue placeholder="Sélectionner une matière" />
                         </SelectTrigger>
                         <SelectContent>
                             {subjects.map((subject) => (
@@ -287,10 +287,10 @@ function TimeslotForm({ form, onSubmit, teachers, subjects, levels, classrooms, 
                 </div>
 
                 <div className="grid gap-2">
-                    <Label>Level</Label>
+                    <Label>Niveau</Label>
                     <Select value={form.data.level_id} onValueChange={(v) => form.setData('level_id', v)}>
                         <SelectTrigger>
-                            <SelectValue placeholder="Select level" />
+                            <SelectValue placeholder="Sélectionner un niveau" />
                         </SelectTrigger>
                         <SelectContent>
                             {levels.map((level) => (
@@ -304,10 +304,10 @@ function TimeslotForm({ form, onSubmit, teachers, subjects, levels, classrooms, 
                 </div>
 
                 <div className="grid gap-2">
-                    <Label>Classroom</Label>
+                    <Label>Salle</Label>
                     <Select value={form.data.classroom_id} onValueChange={(v) => form.setData('classroom_id', v)}>
                         <SelectTrigger>
-                            <SelectValue placeholder="Select classroom" />
+                            <SelectValue placeholder="Sélectionner une salle" />
                         </SelectTrigger>
                         <SelectContent>
                             {classrooms.map((classroom) => (
@@ -322,7 +322,7 @@ function TimeslotForm({ form, onSubmit, teachers, subjects, levels, classrooms, 
             </div>
             <DialogFooter>
                 <DialogClose asChild>
-                    <Button variant="outline" type="button">Cancel</Button>
+                    <Button variant="outline" type="button">Annuler</Button>
                 </DialogClose>
                 <Button type="submit" disabled={form.processing}>
                     {form.processing && <Spinner />}
@@ -335,6 +335,6 @@ function TimeslotForm({ form, onSubmit, teachers, subjects, levels, classrooms, 
 
 TimeslotsIndex.layout = {
     breadcrumbs: [
-        { title: 'Schedule', href: index.url() },
+        { title: 'Emploi du temps', href: index.url() },
     ],
 };

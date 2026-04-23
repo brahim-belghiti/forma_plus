@@ -15,13 +15,13 @@ enum DayOfWeek: int
     public function label(): string
     {
         return match ($this) {
-            self::Monday => 'Monday',
-            self::Tuesday => 'Tuesday',
-            self::Wednesday => 'Wednesday',
-            self::Thursday => 'Thursday',
-            self::Friday => 'Friday',
-            self::Saturday => 'Saturday',
-            self::Sunday => 'Sunday',
+            self::Monday => 'Lundi',
+            self::Tuesday => 'Mardi',
+            self::Wednesday => 'Mercredi',
+            self::Thursday => 'Jeudi',
+            self::Friday => 'Vendredi',
+            self::Saturday => 'Samedi',
+            self::Sunday => 'Dimanche',
         };
     }
 }
