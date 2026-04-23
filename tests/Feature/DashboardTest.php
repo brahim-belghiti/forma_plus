@@ -37,9 +37,9 @@ test('dashboard shows financial summary stats', function () {
         ->component('dashboard')
         ->where('stats.total_students', 1)
         ->where('stats.total_teachers', 1)
-        ->where('stats.total_payments', 1000.00)
-        ->where('stats.total_salaries', 400.00)
-        ->where('stats.total_expenses', 100.00)
-        ->where('stats.balance', 500.00)
+        ->where('stats.total_payments', 1000)
+        ->where('stats.total_salaries', 400)
+        ->where('stats.total_expenses', 100)
+        ->where('stats.balance', 500)
     );
 });
