@@ -20,9 +20,7 @@ class StoreTimeslotRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'teacher_id' => ['required', 'exists:teachers,id'],
-            'subject_id' => ['required', 'exists:subjects,id'],
-            'level_id' => ['required', 'exists:levels,id'],
+            'group_id' => ['required', 'exists:groups,id'],
             'classroom_id' => ['required', 'exists:classrooms,id'],
             'day_of_week' => ['required', Rule::enum(DayOfWeek::class)],
             'start_time' => ['required', 'date_format:H:i'],

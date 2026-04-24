@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreSubjectRequest;
 use App\Http\Requests\UpdateSubjectRequest;
+use App\Http\Resources\LevelResource;
 use App\Http\Resources\SubjectResource;
+use App\Models\Level;
 use App\Models\Subject;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
@@ -19,8 +21,9 @@ class SubjectController extends Controller
 
         return Inertia::render('subjects/index', [
             'subjects' => SubjectResource::collection(
-                Subject::withCount('levels')->orderBy('name')->get()
+                Subject::with('level')->orderBy('name')->get()
             ),
+            'levels' => LevelResource::collection(Level::orderBy('name')->get()),
         ]);
     }
 

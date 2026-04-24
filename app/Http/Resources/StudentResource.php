@@ -22,8 +22,12 @@ class StudentResource extends JsonResource
             'guardian_phone' => $this->guardian_phone,
             'level' => new LevelResource($this->whenLoaded('level')),
             'level_id' => $this->level_id,
-            'subjects' => SubjectResource::collection($this->whenLoaded('subjects')),
-            'subjects_count' => $this->whenCounted('subjects'),
+            'enrollments' => EnrollmentResource::collection($this->whenLoaded('enrollments')),
+            'enrollments_count' => $this->whenCounted('enrollments'),
+            'active_enrollments_count' => $this->when(
+                isset($this->active_enrollments_count),
+                fn () => $this->active_enrollments_count,
+            ),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

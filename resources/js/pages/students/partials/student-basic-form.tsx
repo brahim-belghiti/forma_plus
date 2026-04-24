@@ -3,40 +3,30 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Spinner } from '@/components/ui/spinner';
 import InputError from '@/components/input-error';
-import type { Level, Subject } from '@/types';
+import type { Level } from '@/types';
 
-type StudentFormData = {
+type StudentBasicFormData = {
     first_name: string;
     last_name: string;
     phone: string;
     guardian_name: string;
     guardian_phone: string;
     level_id: string;
-    subject_ids: number[];
 };
 
 type Props = {
-    data: StudentFormData;
-    errors: Partial<Record<keyof StudentFormData, string>>;
+    data: StudentBasicFormData;
+    errors: Partial<Record<keyof StudentBasicFormData, string>>;
     processing: boolean;
     levels: { data: Level[] };
-    subjects: { data: Subject[] };
-    setData: <K extends keyof StudentFormData>(key: K, value: StudentFormData[K]) => void;
+    setData: <K extends keyof StudentBasicFormData>(key: K, value: StudentBasicFormData[K]) => void;
     onSubmit: (e: FormEvent) => void;
     submitLabel: string;
 };
 
-export default function StudentForm({ data, errors, processing, levels, subjects, setData, onSubmit, submitLabel }: Props) {
-    function toggleSubject(subjectId: number) {
-        const ids = data.subject_ids.includes(subjectId)
-            ? data.subject_ids.filter((id) => id !== subjectId)
-            : [...data.subject_ids, subjectId];
-        setData('subject_ids', ids);
-    }
-
+export default function StudentBasicForm({ data, errors, processing, levels, setData, onSubmit, submitLabel }: Props) {
     return (
         <form onSubmit={onSubmit} className="space-y-6 max-w-2xl">
             <div className="grid grid-cols-2 gap-4">
@@ -109,26 +99,6 @@ export default function StudentForm({ data, errors, processing, levels, subjects
                     </SelectContent>
                 </Select>
                 <InputError message={errors.level_id} />
-            </div>
-
-            <div className="grid gap-2">
-                <Label>Matières</Label>
-                <div className="grid grid-cols-2 gap-2 rounded-lg border p-4">
-                    {subjects.data.length === 0 ? (
-                        <p className="text-sm text-muted-foreground col-span-2">Aucune matière disponible. Créez d'abord des matières.</p>
-                    ) : (
-                        subjects.data.map((subject) => (
-                            <label key={subject.id} className="flex items-center gap-2 cursor-pointer">
-                                <Checkbox
-                                    checked={data.subject_ids.includes(subject.id)}
-                                    onCheckedChange={() => toggleSubject(subject.id)}
-                                />
-                                <span className="text-sm">{subject.name}</span>
-                            </label>
-                        ))
-                    )}
-                </div>
-                <InputError message={errors.subject_ids} />
             </div>
 
             <Button type="submit" disabled={processing}>

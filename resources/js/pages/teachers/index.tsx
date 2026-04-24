@@ -1,4 +1,4 @@
-import { Head, router, Link } from '@inertiajs/react';
+import { Head, router, Link, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -14,6 +14,9 @@ type Props = {
 };
 
 export default function TeachersIndex({ teachers, filters }: Props) {
+    const { auth } = usePage().props;
+    const isAdmin = auth.user?.role === 'admin';
+
     const handleSearch = useDebouncedCallback((value: string) => {
         router.get(index.url(), { search: value || undefined }, { preserveState: true, replace: true });
     }, 300);
@@ -53,14 +56,14 @@ export default function TeachersIndex({ teachers, filters }: Props) {
                             <TableHead>Téléphone</TableHead>
                             <TableHead>Matières</TableHead>
                             <TableHead>Niveaux</TableHead>
-                            <TableHead className="text-center">Taux de salaire</TableHead>
+                            {isAdmin && <TableHead className="text-center">Taux de salaire</TableHead>}
                             <TableHead className="w-24"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {teachers.data.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                                <TableCell colSpan={isAdmin ? 6 : 5} className="text-center text-muted-foreground py-8">
                                     Aucun professeur trouvé.
                                 </TableCell>
                             </TableRow>
@@ -83,11 +86,13 @@ export default function TeachersIndex({ teachers, filters }: Props) {
                                             ))}
                                         </div>
                                     </TableCell>
-                                    <TableCell className="text-center">
-                                        {teacher.salary_rate
-                                            ? `${teacher.salary_rate}%`
-                                            : `${teacher.effective_salary_rate}% (défaut)`}
-                                    </TableCell>
+                                    {isAdmin && (
+                                        <TableCell className="text-center">
+                                            {teacher.salary_rate
+                                                ? `${teacher.salary_rate}%`
+                                                : `${teacher.effective_salary_rate}% (défaut)`}
+                                        </TableCell>
+                                    )}
                                     <TableCell>
                                         <div className="flex items-center gap-1 justify-end">
                                             <Button variant="ghost" size="icon" asChild>

@@ -24,8 +24,6 @@ class StoreStudentRequest extends FormRequest
             'guardian_name' => ['nullable', 'string', 'max:255'],
             'guardian_phone' => ['nullable', 'string', 'max:50'],
             'level_id' => ['nullable', 'exists:levels,id'],
-            'subject_ids' => ['nullable', 'array'],
-            'subject_ids.*' => ['exists:subjects,id'],
         ];
     }
 }

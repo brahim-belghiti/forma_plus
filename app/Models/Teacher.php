@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['first_name', 'last_name', 'phone', 'salary_rate', 'school_id', 'user_id'])]
 class Teacher extends Model
@@ -28,9 +29,9 @@ class Teacher extends Model
         return $this->belongsToMany(Subject::class);
     }
 
-    public function levels(): BelongsToMany
+    public function groups(): HasMany
     {
-        return $this->belongsToMany(Level::class);
+        return $this->hasMany(Group::class);
     }
 
     public function user(): BelongsTo

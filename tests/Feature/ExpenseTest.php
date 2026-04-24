@@ -6,7 +6,7 @@ use App\Models\User;
 
 beforeEach(function () {
     $this->school = School::factory()->create();
-    $this->user = User::factory()->create(['school_id' => $this->school->id]);
+    $this->user = User::factory()->admin()->create(['school_id' => $this->school->id]);
 });
 
 test('authenticated user can view expenses index', function () {
@@ -98,4 +98,15 @@ test('guest cannot access expenses', function () {
     $response = $this->get(route('expenses.index'));
 
     $response->assertRedirect(route('login'));
+});
+
+test('secretary cannot access expenses', function () {
+    $secretary = User::factory()->create(['school_id' => $this->school->id]);
+
+    $this->actingAs($secretary)->get(route('expenses.index'))->assertForbidden();
+    $this->actingAs($secretary)->post(route('expenses.store'), [
+        'description' => 'X',
+        'amount' => 10,
+        'spent_at' => '2026-04-22',
+    ])->assertForbidden();
 });

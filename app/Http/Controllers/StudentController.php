@@ -4,12 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
+use App\Http\Resources\GroupResource;
 use App\Http\Resources\LevelResource;
 use App\Http\Resources\StudentResource;
-use App\Http\Resources\SubjectResource;
+use App\Models\Group;
 use App\Models\Level;
 use App\Models\Student;
-use App\Models\Subject;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -22,8 +22,8 @@ class StudentController extends Controller
     {
         Gate::authorize('viewAny', Student::class);
 
-        $students = Student::with(['level', 'subjects'])
-            ->withCount('subjects')
+        $students = Student::with(['level'])
+            ->withCount(['enrollments as active_enrollments_count' => fn ($q) => $q->where('active', true)])
             ->when($request->input('search'), fn ($q, $search) => $q->where(function ($q) use ($search) {
                 $q->where('first_name', 'like', "%{$search}%")
                     ->orWhere('last_name', 'like', "%{$search}%");
@@ -37,7 +37,6 @@ class StudentController extends Controller
         return Inertia::render('students/index', [
             'students' => StudentResource::collection($students),
             'levels' => LevelResource::collection(Level::orderBy('name')->get()),
-            'subjects' => SubjectResource::collection(Subject::orderBy('name')->get()),
             'filters' => $request->only(['search', 'level_id']),
         ]);
     }
@@ -48,39 +47,41 @@ class StudentController extends Controller
 
         return Inertia::render('students/create', [
             'levels' => LevelResource::collection(Level::orderBy('name')->get()),
-            'subjects' => SubjectResource::collection(Subject::orderBy('name')->get()),
         ]);
     }
 
     public function store(StoreStudentRequest $request): RedirectResponse
     {
-        $student = Student::create($request->safe()->except('subject_ids'));
+        $student = Student::create($request->validated());
 
-        if ($request->validated('subject_ids')) {
-            $student->subjects()->sync($request->validated('subject_ids'));
-        }
-
-        return redirect()->route('students.index');
+        return redirect()->route('students.edit', $student);
     }
 
     public function edit(Student $student): Response
     {
         Gate::authorize('update', $student);
 
-        $student->load(['level', 'subjects']);
+        $student->load([
+            'level',
+            'enrollments.group.subject.level',
+            'enrollments.group.teacher',
+        ]);
 
         return Inertia::render('students/edit', [
             'student' => new StudentResource($student),
             'levels' => LevelResource::collection(Level::orderBy('name')->get()),
-            'subjects' => SubjectResource::collection(Subject::orderBy('name')->get()),
+            'groups' => GroupResource::collection(
+                Group::with(['subject.level', 'teacher'])
+                    ->where('active', true)
+                    ->orderBy('name')
+                    ->get()
+            ),
         ]);
     }
 
     public function update(UpdateStudentRequest $request, Student $student): RedirectResponse
     {
-        $student->update($request->safe()->except('subject_ids'));
-
-        $student->subjects()->sync($request->validated('subject_ids') ?? []);
+        $student->update($request->validated());
 
         return redirect()->route('students.index');
     }

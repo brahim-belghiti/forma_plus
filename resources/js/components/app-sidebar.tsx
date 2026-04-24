@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { BookOpen, Banknote, Calendar, CreditCard, DoorOpen, FolderGit2, GraduationCap, LayoutGrid, Layers, Receipt, UserCheck, Users } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -25,11 +25,14 @@ import { index as salariesIndex } from '@/actions/App/Http/Controllers/SalaryCon
 import { index as expensesIndex } from '@/actions/App/Http/Controllers/ExpenseController';
 import type { NavItem } from '@/types';
 
-const mainNavItems: NavItem[] = [
+type NavItemWithRole = NavItem & { adminOnly?: boolean };
+
+const mainNavItems: NavItemWithRole[] = [
     {
         title: 'Tableau de bord',
         href: dashboard(),
         icon: LayoutGrid,
+        adminOnly: true,
     },
     {
         title: 'Niveaux',
@@ -70,35 +73,31 @@ const mainNavItems: NavItem[] = [
         title: 'Salaires',
         href: salariesIndex.url(),
         icon: Banknote,
+        adminOnly: true,
     },
     {
         title: 'Dépenses',
         href: expensesIndex.url(),
         icon: Receipt,
+        adminOnly: true,
     },
 ];
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Dépôt',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
-];
+
 
 export function AppSidebar() {
+    const { auth } = usePage().props;
+    const isAdmin = auth.user?.role === 'admin';
+    const visibleItems = mainNavItems.filter((item) => isAdmin || !item.adminOnly);
+    const homeHref = isAdmin ? dashboard() : studentsIndex.url();
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard()} prefetch>
+                            <Link href={homeHref} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
@@ -107,11 +106,10 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain items={visibleItems} />
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

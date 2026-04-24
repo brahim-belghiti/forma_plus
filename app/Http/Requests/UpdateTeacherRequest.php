@@ -11,6 +11,13 @@ class UpdateTeacherRequest extends FormRequest
         return $this->user()->can('update', $this->route('teacher'));
     }
 
+    protected function prepareForValidation(): void
+    {
+        if (! $this->user()->isAdmin()) {
+            $this->request->remove('salary_rate');
+        }
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -23,8 +30,6 @@ class UpdateTeacherRequest extends FormRequest
             'salary_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'subject_ids' => ['nullable', 'array'],
             'subject_ids.*' => ['exists:subjects,id'],
-            'level_ids' => ['nullable', 'array'],
-            'level_ids.*' => ['exists:levels,id'],
         ];
     }
 }

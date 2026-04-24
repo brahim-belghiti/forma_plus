@@ -7,6 +7,11 @@ use App\Models\User;
 
 class SalaryPolicy
 {
+    public function before(User $user, string $ability): ?bool
+    {
+        return $user->isAdmin() ? null : false;
+    }
+
     public function viewAny(User $user): bool
     {
         return true;

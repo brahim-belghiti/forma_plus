@@ -42,17 +42,20 @@ test('user can view create teacher form', function () {
     $response->assertInertia(fn ($page) => $page->component('teachers/create'));
 });
 
-test('user can create a teacher with subjects and levels', function () {
-    $subjects = Subject::factory()->count(2)->create(['school_id' => $this->school->id]);
-    $levels = Level::factory()->count(2)->create(['school_id' => $this->school->id]);
+test('admin can create a teacher with salary rate and subjects', function () {
+    $admin = User::factory()->admin()->create(['school_id' => $this->school->id]);
+    $level = Level::factory()->create(['school_id' => $this->school->id]);
+    $subjects = Subject::factory()->count(2)->create([
+        'school_id' => $this->school->id,
+        'level_id' => $level->id,
+    ]);
 
-    $response = $this->actingAs($this->user)->post(route('teachers.store'), [
+    $response = $this->actingAs($admin)->post(route('teachers.store'), [
         'first_name' => 'Karim',
         'last_name' => 'Benali',
         'phone' => '0612345678',
         'salary_rate' => '50',
         'subject_ids' => $subjects->pluck('id')->toArray(),
-        'level_ids' => $levels->pluck('id')->toArray(),
     ]);
 
     $response->assertRedirect(route('teachers.index'));
@@ -64,7 +67,53 @@ test('user can create a teacher with subjects and levels', function () {
 
     $teacher = Teacher::where('first_name', 'Karim')->first();
     expect($teacher->subjects)->toHaveCount(2);
-    expect($teacher->levels)->toHaveCount(2);
+});
+
+test('secretary cannot set salary rate on create (field is stripped)', function () {
+    $response = $this->actingAs($this->user)->post(route('teachers.store'), [
+        'first_name' => 'Karim',
+        'last_name' => 'Benali',
+        'salary_rate' => '99',
+    ]);
+
+    $response->assertRedirect(route('teachers.index'));
+    $teacher = Teacher::where('first_name', 'Karim')->first();
+    expect($teacher->salary_rate)->toBeNull();
+});
+
+test('secretary cannot update salary rate (field is stripped)', function () {
+    $teacher = Teacher::factory()->create(['school_id' => $this->school->id, 'salary_rate' => 30]);
+
+    $this->actingAs($this->user)->put(route('teachers.update', $teacher), [
+        'first_name' => $teacher->first_name,
+        'last_name' => $teacher->last_name,
+        'salary_rate' => '90',
+    ])->assertRedirect();
+
+    expect((float) $teacher->fresh()->salary_rate)->toBe(30.0);
+});
+
+test('teacher resource hides salary fields from secretary', function () {
+    Teacher::factory()->create(['school_id' => $this->school->id, 'salary_rate' => 40]);
+
+    $response = $this->actingAs($this->user)->get(route('teachers.index'));
+
+    $response->assertInertia(fn ($page) => $page
+        ->missing('teachers.data.0.salary_rate')
+        ->missing('teachers.data.0.effective_salary_rate')
+    );
+});
+
+test('teacher resource exposes salary fields to admin', function () {
+    $admin = User::factory()->admin()->create(['school_id' => $this->school->id]);
+    Teacher::factory()->create(['school_id' => $this->school->id, 'salary_rate' => 40]);
+
+    $response = $this->actingAs($admin)->get(route('teachers.index'));
+
+    $response->assertInertia(fn ($page) => $page
+        ->has('teachers.data.0.salary_rate')
+        ->has('teachers.data.0.effective_salary_rate')
+    );
 });
 
 test('teacher salary rate is nullable for school default', function () {

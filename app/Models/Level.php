@@ -7,7 +7,7 @@ use Database\Factories\LevelFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['name', 'school_id'])]
 class Level extends Model
@@ -15,8 +15,13 @@ class Level extends Model
     /** @use HasFactory<LevelFactory> */
     use BelongsToSchool, HasFactory;
 
-    public function subjects(): BelongsToMany
+    public function subjects(): HasMany
     {
-        return $this->belongsToMany(Subject::class);
+        return $this->hasMany(Subject::class);
+    }
+
+    public function students(): HasMany
+    {
+        return $this->hasMany(Student::class);
     }
 }

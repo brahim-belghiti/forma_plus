@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { index, create, edit, destroy } from '@/actions/App/Http/Controllers/StudentController';
 import type { Student, Level, PaginatedData } from '@/types';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
@@ -73,7 +72,7 @@ export default function StudentsIndex({ students, levels, filters }: Props) {
                         <TableRow>
                             <TableHead>Nom</TableHead>
                             <TableHead>Niveau</TableHead>
-                            <TableHead>Matières</TableHead>
+                            <TableHead className="text-center">Inscriptions</TableHead>
                             <TableHead>Tuteur</TableHead>
                             <TableHead>Téléphone</TableHead>
                             <TableHead className="w-24"></TableHead>
@@ -91,15 +90,7 @@ export default function StudentsIndex({ students, levels, filters }: Props) {
                                 <TableRow key={student.id}>
                                     <TableCell className="font-medium">{student.full_name}</TableCell>
                                     <TableCell>{student.level?.name ?? '-'}</TableCell>
-                                    <TableCell>
-                                        <div className="flex flex-wrap gap-1">
-                                            {student.subjects?.map((subject) => (
-                                                <Badge key={subject.id} variant="secondary">
-                                                    {subject.name}
-                                                </Badge>
-                                            ))}
-                                        </div>
-                                    </TableCell>
+                                    <TableCell className="text-center">{student.active_enrollments_count ?? 0}</TableCell>
                                     <TableCell>{student.guardian_name ?? '-'}</TableCell>
                                     <TableCell>{student.phone ?? student.guardian_phone ?? '-'}</TableCell>
                                     <TableCell>

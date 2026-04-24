@@ -15,8 +15,8 @@ class SubjectResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'levels' => LevelResource::collection($this->whenLoaded('levels')),
-            'levels_count' => $this->whenCounted('levels'),
+            'level_id' => $this->level_id,
+            'level' => new LevelResource($this->whenLoaded('level')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

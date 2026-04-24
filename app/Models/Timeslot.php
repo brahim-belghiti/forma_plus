@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['teacher_id', 'subject_id', 'level_id', 'classroom_id', 'day_of_week', 'start_time', 'end_time', 'school_id'])]
+#[Fillable(['school_id', 'group_id', 'classroom_id', 'day_of_week', 'start_time', 'end_time'])]
 class Timeslot extends Model
 {
     /** @use HasFactory<TimeslotFactory> */
@@ -23,19 +23,9 @@ class Timeslot extends Model
         ];
     }
 
-    public function teacher(): BelongsTo
+    public function group(): BelongsTo
     {
-        return $this->belongsTo(Teacher::class);
-    }
-
-    public function subject(): BelongsTo
-    {
-        return $this->belongsTo(Subject::class);
-    }
-
-    public function level(): BelongsTo
-    {
-        return $this->belongsTo(Level::class);
+        return $this->belongsTo(Group::class);
     }
 
     public function classroom(): BelongsTo

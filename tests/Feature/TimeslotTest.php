@@ -2,6 +2,7 @@
 
 use App\Enums\DayOfWeek;
 use App\Models\Classroom;
+use App\Models\Group;
 use App\Models\Level;
 use App\Models\School;
 use App\Models\Subject;
@@ -13,17 +14,23 @@ beforeEach(function () {
     $this->school = School::factory()->create();
     $this->user = User::factory()->create(['school_id' => $this->school->id]);
     $this->teacher = Teacher::factory()->create(['school_id' => $this->school->id]);
-    $this->subject = Subject::factory()->create(['school_id' => $this->school->id]);
     $this->level = Level::factory()->create(['school_id' => $this->school->id]);
+    $this->subject = Subject::factory()->create([
+        'school_id' => $this->school->id,
+        'level_id' => $this->level->id,
+    ]);
     $this->classroom = Classroom::factory()->create(['school_id' => $this->school->id]);
+    $this->group = Group::factory()->create([
+        'school_id' => $this->school->id,
+        'subject_id' => $this->subject->id,
+        'teacher_id' => $this->teacher->id,
+    ]);
 });
 
 test('authenticated user can view timeslots index', function () {
     Timeslot::factory()->count(3)->create([
         'school_id' => $this->school->id,
-        'teacher_id' => $this->teacher->id,
-        'subject_id' => $this->subject->id,
-        'level_id' => $this->level->id,
+        'group_id' => $this->group->id,
         'classroom_id' => $this->classroom->id,
     ]);
 
@@ -33,9 +40,7 @@ test('authenticated user can view timeslots index', function () {
     $response->assertInertia(fn ($page) => $page
         ->component('timeslots/index')
         ->has('timeslots.data', 3)
-        ->has('teachers.data')
-        ->has('subjects.data')
-        ->has('levels.data')
+        ->has('groups.data')
         ->has('classrooms.data')
     );
 });
@@ -43,9 +48,7 @@ test('authenticated user can view timeslots index', function () {
 test('user only sees timeslots from their school', function () {
     Timeslot::factory()->create([
         'school_id' => $this->school->id,
-        'teacher_id' => $this->teacher->id,
-        'subject_id' => $this->subject->id,
-        'level_id' => $this->level->id,
+        'group_id' => $this->group->id,
         'classroom_id' => $this->classroom->id,
     ]);
     Timeslot::factory()->create();
@@ -59,9 +62,7 @@ test('user only sees timeslots from their school', function () {
 
 test('user can create a timeslot', function () {
     $response = $this->actingAs($this->user)->post(route('timeslots.store'), [
-        'teacher_id' => $this->teacher->id,
-        'subject_id' => $this->subject->id,
-        'level_id' => $this->level->id,
+        'group_id' => $this->group->id,
         'classroom_id' => $this->classroom->id,
         'day_of_week' => DayOfWeek::Monday->value,
         'start_time' => '09:00',
@@ -71,9 +72,7 @@ test('user can create a timeslot', function () {
     $response->assertRedirect();
     $this->assertDatabaseHas('timeslots', [
         'school_id' => $this->school->id,
-        'teacher_id' => $this->teacher->id,
-        'subject_id' => $this->subject->id,
-        'level_id' => $this->level->id,
+        'group_id' => $this->group->id,
         'classroom_id' => $this->classroom->id,
         'day_of_week' => DayOfWeek::Monday->value,
     ]);
@@ -83,15 +82,13 @@ test('timeslot requires all fields', function () {
     $response = $this->actingAs($this->user)->post(route('timeslots.store'), []);
 
     $response->assertSessionHasErrors([
-        'teacher_id', 'subject_id', 'level_id', 'classroom_id', 'day_of_week', 'start_time', 'end_time',
+        'group_id', 'classroom_id', 'day_of_week', 'start_time', 'end_time',
     ]);
 });
 
 test('end time must be after start time', function () {
     $response = $this->actingAs($this->user)->post(route('timeslots.store'), [
-        'teacher_id' => $this->teacher->id,
-        'subject_id' => $this->subject->id,
-        'level_id' => $this->level->id,
+        'group_id' => $this->group->id,
         'classroom_id' => $this->classroom->id,
         'day_of_week' => DayOfWeek::Monday->value,
         'start_time' => '11:00',
@@ -104,9 +101,7 @@ test('end time must be after start time', function () {
 test('user can update a timeslot', function () {
     $timeslot = Timeslot::factory()->create([
         'school_id' => $this->school->id,
-        'teacher_id' => $this->teacher->id,
-        'subject_id' => $this->subject->id,
-        'level_id' => $this->level->id,
+        'group_id' => $this->group->id,
         'classroom_id' => $this->classroom->id,
         'day_of_week' => DayOfWeek::Monday,
         'start_time' => '09:00',
@@ -116,9 +111,7 @@ test('user can update a timeslot', function () {
     $newClassroom = Classroom::factory()->create(['school_id' => $this->school->id]);
 
     $response = $this->actingAs($this->user)->put(route('timeslots.update', $timeslot), [
-        'teacher_id' => $this->teacher->id,
-        'subject_id' => $this->subject->id,
-        'level_id' => $this->level->id,
+        'group_id' => $this->group->id,
         'classroom_id' => $newClassroom->id,
         'day_of_week' => DayOfWeek::Tuesday->value,
         'start_time' => '14:00',
@@ -134,9 +127,7 @@ test('user can update a timeslot', function () {
 test('user can delete a timeslot', function () {
     $timeslot = Timeslot::factory()->create([
         'school_id' => $this->school->id,
-        'teacher_id' => $this->teacher->id,
-        'subject_id' => $this->subject->id,
-        'level_id' => $this->level->id,
+        'group_id' => $this->group->id,
         'classroom_id' => $this->classroom->id,
     ]);
 

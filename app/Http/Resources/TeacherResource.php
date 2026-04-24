@@ -12,18 +12,18 @@ class TeacherResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $isAdmin = $request->user()?->isAdmin() ?? false;
+
         return [
             'id' => $this->id,
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             'full_name' => $this->fullName(),
             'phone' => $this->phone,
-            'salary_rate' => $this->salary_rate,
-            'effective_salary_rate' => $this->effectiveSalaryRate(),
+            'salary_rate' => $this->when($isAdmin, fn () => $this->salary_rate),
+            'effective_salary_rate' => $this->when($isAdmin, fn () => $this->effectiveSalaryRate()),
             'subjects' => SubjectResource::collection($this->whenLoaded('subjects')),
-            'levels' => LevelResource::collection($this->whenLoaded('levels')),
             'subjects_count' => $this->whenCounted('subjects'),
-            'levels_count' => $this->whenCounted('levels'),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

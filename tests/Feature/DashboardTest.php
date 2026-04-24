@@ -13,17 +13,25 @@ test('guests are redirected to the login page', function () {
     $response->assertRedirect(route('login'));
 });
 
-test('authenticated users can visit the dashboard', function () {
-    $user = User::factory()->create();
+test('admins can visit the dashboard', function () {
+    $user = User::factory()->admin()->create();
     $this->actingAs($user);
 
     $response = $this->get(route('dashboard'));
     $response->assertOk();
 });
 
+test('secretaries are redirected from the dashboard to students', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    $response = $this->get(route('dashboard'));
+    $response->assertRedirect(route('students.index'));
+});
+
 test('dashboard shows financial summary stats', function () {
     $school = School::factory()->create();
-    $user = User::factory()->create(['school_id' => $school->id]);
+    $user = User::factory()->admin()->create(['school_id' => $school->id]);
     $student = Student::factory()->create(['school_id' => $school->id]);
     $teacher = Teacher::factory()->create(['school_id' => $school->id]);
 

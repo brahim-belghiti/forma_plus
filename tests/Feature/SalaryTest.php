@@ -7,7 +7,7 @@ use App\Models\User;
 
 beforeEach(function () {
     $this->school = School::factory()->create();
-    $this->user = User::factory()->create(['school_id' => $this->school->id]);
+    $this->user = User::factory()->admin()->create(['school_id' => $this->school->id]);
     $this->teacher = Teacher::factory()->create(['school_id' => $this->school->id]);
 });
 
@@ -124,4 +124,17 @@ test('guest cannot access salaries', function () {
     $response = $this->get(route('salaries.index'));
 
     $response->assertRedirect(route('login'));
+});
+
+test('secretary cannot access salaries', function () {
+    $secretary = User::factory()->create(['school_id' => $this->school->id]);
+
+    $this->actingAs($secretary)->get(route('salaries.index'))->assertForbidden();
+    $this->actingAs($secretary)->post(route('salaries.store'), [
+        'teacher_id' => $this->teacher->id,
+        'amount' => 100,
+        'period_month' => 4,
+        'period_year' => 2026,
+        'paid_at' => '2026-04-22',
+    ])->assertForbidden();
 });

@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\GroupController;
 use App\Http\Controllers\LevelController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SalaryController;
@@ -24,7 +26,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('subjects', SubjectController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('students', StudentController::class)->except(['show']);
     Route::resource('teachers', TeacherController::class)->except(['show']);
+
+    Route::post('enrollments', [EnrollmentController::class, 'store'])->name('enrollments.store');
+    Route::put('enrollments/{enrollment}', [EnrollmentController::class, 'update'])->name('enrollments.update');
+    Route::post('enrollments/{enrollment}/end', [EnrollmentController::class, 'end'])->name('enrollments.end');
+    Route::delete('enrollments/{enrollment}', [EnrollmentController::class, 'destroy'])->name('enrollments.destroy');
     Route::resource('classrooms', ClassroomController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('groups', GroupController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('timeslots', TimeslotController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('payments', PaymentController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('salaries', SalaryController::class)->only(['index', 'store', 'update', 'destroy']);

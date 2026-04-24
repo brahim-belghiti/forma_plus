@@ -1,9 +1,12 @@
 <?php
 
+use App\Models\Enrollment;
+use App\Models\Group;
 use App\Models\Level;
 use App\Models\School;
 use App\Models\Student;
 use App\Models\Subject;
+use App\Models\Teacher;
 use App\Models\User;
 
 beforeEach(function () {
@@ -61,9 +64,8 @@ test('user can view create student form', function () {
     $response->assertInertia(fn ($page) => $page->component('students/create'));
 });
 
-test('user can create a student', function () {
+test('user can create a student and is redirected to edit for enrollments', function () {
     $level = Level::factory()->create(['school_id' => $this->school->id]);
-    $subjects = Subject::factory()->count(2)->create(['school_id' => $this->school->id]);
 
     $response = $this->actingAs($this->user)->post(route('students.store'), [
         'first_name' => 'Ahmed',
@@ -72,19 +74,16 @@ test('user can create a student', function () {
         'guardian_name' => 'Mohamed Zaki',
         'guardian_phone' => '0698765432',
         'level_id' => $level->id,
-        'subject_ids' => $subjects->pluck('id')->toArray(),
     ]);
 
-    $response->assertRedirect(route('students.index'));
+    $student = Student::where('first_name', 'Ahmed')->first();
+    $response->assertRedirect(route('students.edit', $student));
     $this->assertDatabaseHas('students', [
         'first_name' => 'Ahmed',
         'last_name' => 'Zaki',
         'school_id' => $this->school->id,
         'level_id' => $level->id,
     ]);
-
-    $student = Student::where('first_name', 'Ahmed')->first();
-    expect($student->subjects)->toHaveCount(2);
 });
 
 test('user can view edit student form', function () {
@@ -111,19 +110,32 @@ test('user can update a student', function () {
     expect($student->fresh()->first_name)->toBe('New');
 });
 
-test('user can update student subjects', function () {
+test('student edit page receives enrollments and groups', function () {
     $student = Student::factory()->create(['school_id' => $this->school->id]);
-    $subjects = Subject::factory()->count(2)->create(['school_id' => $this->school->id]);
-    $student->subjects()->attach($subjects->first());
-
-    $response = $this->actingAs($this->user)->put(route('students.update', $student), [
-        'first_name' => $student->first_name,
-        'last_name' => $student->last_name,
-        'subject_ids' => [$subjects->last()->id],
+    $teacher = Teacher::factory()->create(['school_id' => $this->school->id]);
+    $level = Level::factory()->create(['school_id' => $this->school->id]);
+    $subject = Subject::factory()->create([
+        'school_id' => $this->school->id,
+        'level_id' => $level->id,
+    ]);
+    $group = Group::factory()->create([
+        'school_id' => $this->school->id,
+        'subject_id' => $subject->id,
+        'teacher_id' => $teacher->id,
+    ]);
+    Enrollment::factory()->create([
+        'school_id' => $this->school->id,
+        'student_id' => $student->id,
+        'group_id' => $group->id,
     ]);
 
-    $response->assertRedirect();
-    expect($student->fresh()->subjects->pluck('id')->toArray())->toBe([$subjects->last()->id]);
+    $response = $this->actingAs($this->user)->get(route('students.edit', $student));
+
+    $response->assertInertia(fn ($page) => $page
+        ->component('students/edit')
+        ->has('student.data.enrollments', 1)
+        ->has('groups.data')
+    );
 });
 
 test('user can delete a student', function () {

@@ -49,8 +49,25 @@ export type Student = {
     guardian_phone: string | null;
     level: Level | null;
     level_id: number | null;
-    subjects?: Subject[];
-    subjects_count?: number;
+    enrollments?: Enrollment[];
+    enrollments_count?: number;
+    active_enrollments_count?: number;
+    created_at: string;
+    updated_at: string;
+};
+
+export type Enrollment = {
+    id: number;
+    student_id: number;
+    teacher_id: number;
+    subject_id: number;
+    monthly_fee: string;
+    start_date: string;
+    end_date: string | null;
+    active: boolean;
+    student?: Student;
+    teacher?: Teacher;
+    subject?: Subject;
     created_at: string;
     updated_at: string;
 };

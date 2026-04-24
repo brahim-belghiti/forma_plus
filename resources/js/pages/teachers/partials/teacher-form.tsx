@@ -1,3 +1,4 @@
+import { usePage } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,6 +29,9 @@ type Props = {
 };
 
 export default function TeacherForm({ data, errors, processing, levels, subjects, setData, onSubmit, submitLabel }: Props) {
+    const { auth } = usePage().props;
+    const isAdmin = auth.user?.role === 'admin';
+
     function toggleId(field: 'subject_ids' | 'level_ids', id: number) {
         const ids = data[field].includes(id)
             ? data[field].filter((v) => v !== id)
@@ -61,7 +65,7 @@ export default function TeacherForm({ data, errors, processing, levels, subjects
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className={isAdmin ? 'grid grid-cols-2 gap-4' : ''}>
                 <div className="grid gap-2">
                     <Label htmlFor="phone">Téléphone</Label>
                     <Input
@@ -71,20 +75,22 @@ export default function TeacherForm({ data, errors, processing, levels, subjects
                     />
                     <InputError message={errors.phone} />
                 </div>
-                <div className="grid gap-2">
-                    <Label htmlFor="salary_rate">Taux de salaire (%)</Label>
-                    <Input
-                        id="salary_rate"
-                        type="number"
-                        min="0"
-                        max="100"
-                        step="0.01"
-                        value={data.salary_rate}
-                        onChange={(e) => setData('salary_rate', e.target.value)}
-                        placeholder="Laisser vide pour utiliser le taux par défaut"
-                    />
-                    <InputError message={errors.salary_rate} />
-                </div>
+                {isAdmin && (
+                    <div className="grid gap-2">
+                        <Label htmlFor="salary_rate">Taux de salaire (%)</Label>
+                        <Input
+                            id="salary_rate"
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="0.01"
+                            value={data.salary_rate}
+                            onChange={(e) => setData('salary_rate', e.target.value)}
+                            placeholder="Laisser vide pour utiliser le taux par défaut"
+                        />
+                        <InputError message={errors.salary_rate} />
+                    </div>
+                )}
             </div>
 
             <div className="grid gap-2">

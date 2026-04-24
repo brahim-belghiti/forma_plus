@@ -4,10 +4,8 @@ namespace Database\Factories;
 
 use App\Enums\DayOfWeek;
 use App\Models\Classroom;
-use App\Models\Level;
+use App\Models\Group;
 use App\Models\School;
-use App\Models\Subject;
-use App\Models\Teacher;
 use App\Models\Timeslot;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -25,9 +23,7 @@ class TimeslotFactory extends Factory
 
         return [
             'school_id' => School::factory(),
-            'teacher_id' => Teacher::factory(),
-            'subject_id' => Subject::factory(),
-            'level_id' => Level::factory(),
+            'group_id' => Group::factory(),
             'classroom_id' => Classroom::factory(),
             'day_of_week' => fake()->randomElement(DayOfWeek::cases()),
             'start_time' => sprintf('%02d:00', $hour),

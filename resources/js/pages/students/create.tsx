@@ -1,15 +1,14 @@
 import { Head, useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { index, store } from '@/actions/App/Http/Controllers/StudentController';
-import StudentForm from './partials/student-form';
-import type { Level, Subject } from '@/types';
+import StudentBasicForm from './partials/student-basic-form';
+import type { Level } from '@/types';
 
 type Props = {
     levels: { data: Level[] };
-    subjects: { data: Subject[] };
 };
 
-export default function CreateStudent({ levels, subjects }: Props) {
+export default function CreateStudent({ levels }: Props) {
     const form = useForm({
         first_name: '',
         last_name: '',
@@ -17,7 +16,6 @@ export default function CreateStudent({ levels, subjects }: Props) {
         guardian_name: '',
         guardian_phone: '',
         level_id: '',
-        subject_ids: [] as number[],
     });
 
     function handleSubmit(e: FormEvent) {
@@ -29,15 +27,17 @@ export default function CreateStudent({ levels, subjects }: Props) {
         <>
             <Head title="Ajouter un élève" />
             <h1 className="text-2xl font-semibold mb-6">Ajouter un élève</h1>
-            <StudentForm
+            <p className="text-sm text-muted-foreground mb-6">
+                Créez l'élève puis ajoutez ses inscriptions (matière, professeur, tarif mensuel) depuis la page de modification.
+            </p>
+            <StudentBasicForm
                 data={form.data}
                 errors={form.errors}
                 processing={form.processing}
                 levels={levels}
-                subjects={subjects}
                 setData={form.setData}
                 onSubmit={handleSubmit}
-                submitLabel="Créer l'élève"
+                submitLabel="Continuer vers les inscriptions"
             />
         </>
     );

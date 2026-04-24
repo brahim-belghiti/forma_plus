@@ -1,16 +1,19 @@
 import { Head, useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { index, update } from '@/actions/App/Http/Controllers/StudentController';
-import StudentForm from './partials/student-form';
-import type { Student, Level, Subject } from '@/types';
+import StudentBasicForm from './partials/student-basic-form';
+import StudentEnrollments from './partials/student-enrollments';
+import { Separator } from '@/components/ui/separator';
+import type { Student, Level, Subject, Teacher } from '@/types';
 
 type Props = {
     student: { data: Student };
     levels: { data: Level[] };
     subjects: { data: Subject[] };
+    teachers: { data: Teacher[] };
 };
 
-export default function EditStudent({ student, levels, subjects }: Props) {
+export default function EditStudent({ student, levels, subjects, teachers }: Props) {
     const s = student.data;
 
     const form = useForm({
@@ -20,7 +23,6 @@ export default function EditStudent({ student, levels, subjects }: Props) {
         guardian_name: s.guardian_name ?? '',
         guardian_phone: s.guardian_phone ?? '',
         level_id: s.level_id ? String(s.level_id) : '',
-        subject_ids: s.subjects?.map((sub) => sub.id) ?? [],
     });
 
     function handleSubmit(e: FormEvent) {
@@ -32,15 +34,23 @@ export default function EditStudent({ student, levels, subjects }: Props) {
         <>
             <Head title={`Modifier ${s.full_name}`} />
             <h1 className="text-2xl font-semibold mb-6">Modifier {s.full_name}</h1>
-            <StudentForm
+
+            <StudentBasicForm
                 data={form.data}
                 errors={form.errors}
                 processing={form.processing}
                 levels={levels}
-                subjects={subjects}
                 setData={form.setData}
                 onSubmit={handleSubmit}
                 submitLabel="Enregistrer"
+            />
+
+            <Separator className="my-8" />
+
+            <StudentEnrollments
+                student={s}
+                subjects={subjects.data}
+                teachers={teachers.data}
             />
         </>
     );
