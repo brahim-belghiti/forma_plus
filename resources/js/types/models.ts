@@ -17,8 +17,8 @@ export type Level = {
 export type Subject = {
     id: number;
     name: string;
-    levels?: Level[];
-    levels_count?: number;
+    level_id: number;
+    level?: Level;
     created_at: string;
     updated_at: string;
 };
@@ -32,9 +32,20 @@ export type Teacher = {
     salary_rate: string | null;
     effective_salary_rate: number;
     subjects?: Subject[];
-    levels?: Level[];
     subjects_count?: number;
-    levels_count?: number;
+    created_at: string;
+    updated_at: string;
+};
+
+export type Group = {
+    id: number;
+    name: string;
+    active: boolean;
+    subject_id: number;
+    teacher_id: number;
+    subject?: Subject;
+    teacher?: Teacher;
+    active_enrollments_count?: number;
     created_at: string;
     updated_at: string;
 };
@@ -59,32 +70,26 @@ export type Student = {
 export type Enrollment = {
     id: number;
     student_id: number;
-    teacher_id: number;
-    subject_id: number;
+    group_id: number;
     monthly_fee: string;
     start_date: string;
     end_date: string | null;
     active: boolean;
     student?: Student;
-    teacher?: Teacher;
-    subject?: Subject;
+    group?: Group;
     created_at: string;
     updated_at: string;
 };
 
 export type Timeslot = {
     id: number;
-    teacher_id: number;
-    subject_id: number;
-    level_id: number;
+    group_id: number;
     classroom_id: number;
     day_of_week: number;
     day_of_week_label: string;
     start_time: string;
     end_time: string;
-    teacher?: Teacher;
-    subject?: Subject;
-    level?: Level;
+    group?: Group;
     classroom?: Classroom;
     created_at: string;
     updated_at: string;

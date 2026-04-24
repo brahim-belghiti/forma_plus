@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Spinner } from '@/components/ui/spinner';
 import InputError from '@/components/input-error';
 import { index, store, update, destroy } from '@/actions/App/Http/Controllers/TimeslotController';
-import type { Timeslot, Teacher, Subject, Level, Classroom } from '@/types';
+import type { Timeslot, Group, Classroom } from '@/types';
 import { Pencil, Trash2, Plus } from 'lucide-react';
 
 const DAYS_OF_WEEK = [
@@ -24,16 +24,12 @@ const DAYS_OF_WEEK = [
 
 type Props = {
     timeslots: { data: Timeslot[] };
-    teachers: { data: Teacher[] };
-    subjects: { data: Subject[] };
-    levels: { data: Level[] };
+    groups: { data: Group[] };
     classrooms: { data: Classroom[] };
 };
 
 type TimeslotFormData = {
-    teacher_id: string;
-    subject_id: string;
-    level_id: string;
+    group_id: string;
     classroom_id: string;
     day_of_week: string;
     start_time: string;
@@ -41,16 +37,14 @@ type TimeslotFormData = {
 };
 
 const emptyForm: TimeslotFormData = {
-    teacher_id: '',
-    subject_id: '',
-    level_id: '',
+    group_id: '',
     classroom_id: '',
     day_of_week: '',
     start_time: '',
     end_time: '',
 };
 
-export default function TimeslotsIndex({ timeslots, teachers, subjects, levels, classrooms }: Props) {
+export default function TimeslotsIndex({ timeslots, groups, classrooms }: Props) {
     const [showCreate, setShowCreate] = useState(false);
     const [editingTimeslot, setEditingTimeslot] = useState<Timeslot | null>(null);
 
@@ -85,9 +79,7 @@ export default function TimeslotsIndex({ timeslots, teachers, subjects, levels, 
 
     function openEdit(timeslot: Timeslot) {
         editForm.setData({
-            teacher_id: String(timeslot.teacher_id),
-            subject_id: String(timeslot.subject_id),
-            level_id: String(timeslot.level_id),
+            group_id: String(timeslot.group_id),
             classroom_id: String(timeslot.classroom_id),
             day_of_week: String(timeslot.day_of_week),
             start_time: timeslot.start_time.slice(0, 5),
@@ -101,16 +93,24 @@ export default function TimeslotsIndex({ timeslots, teachers, subjects, levels, 
         timeslots: timeslots.data.filter((t) => t.day_of_week === day.value),
     })).filter((day) => day.timeslots.length > 0);
 
+    const canCreate = groups.data.length > 0 && classrooms.data.length > 0;
+
     return (
         <>
             <Head title="Emploi du temps" />
             <div className="flex items-center justify-between mb-6">
                 <h1 className="text-2xl font-semibold">Emploi du temps</h1>
-                <Button onClick={() => setShowCreate(true)}>
+                <Button onClick={() => setShowCreate(true)} disabled={!canCreate}>
                     <Plus className="mr-2 h-4 w-4" />
                     Ajouter un créneau
                 </Button>
             </div>
+
+            {!canCreate && (
+                <p className="mb-4 text-sm text-muted-foreground">
+                    Ajoutez d'abord un groupe et une salle avant de créer un créneau.
+                </p>
+            )}
 
             {timeslots.data.length === 0 ? (
                 <div className="rounded-lg border p-8 text-center text-muted-foreground">
@@ -127,9 +127,10 @@ export default function TimeslotsIndex({ timeslots, teachers, subjects, levels, 
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead>Horaire</TableHead>
-                                        <TableHead>Professeur</TableHead>
+                                        <TableHead>Groupe</TableHead>
                                         <TableHead>Matière</TableHead>
                                         <TableHead>Niveau</TableHead>
+                                        <TableHead>Professeur</TableHead>
                                         <TableHead>Salle</TableHead>
                                         <TableHead className="w-24"></TableHead>
                                     </TableRow>
@@ -140,9 +141,10 @@ export default function TimeslotsIndex({ timeslots, teachers, subjects, levels, 
                                             <TableCell className="font-medium">
                                                 {timeslot.start_time.slice(0, 5)} - {timeslot.end_time.slice(0, 5)}
                                             </TableCell>
-                                            <TableCell>{timeslot.teacher?.full_name}</TableCell>
-                                            <TableCell>{timeslot.subject?.name}</TableCell>
-                                            <TableCell>{timeslot.level?.name}</TableCell>
+                                            <TableCell>{timeslot.group?.name}</TableCell>
+                                            <TableCell>{timeslot.group?.subject?.name}</TableCell>
+                                            <TableCell>{timeslot.group?.subject?.level?.name ?? '—'}</TableCell>
+                                            <TableCell>{timeslot.group?.teacher?.full_name}</TableCell>
                                             <TableCell>{timeslot.classroom?.name}</TableCell>
                                             <TableCell>
                                                 <div className="flex items-center gap-1 justify-end">
@@ -171,9 +173,7 @@ export default function TimeslotsIndex({ timeslots, teachers, subjects, levels, 
                     <TimeslotForm
                         form={createForm}
                         onSubmit={handleCreate}
-                        teachers={teachers.data}
-                        subjects={subjects.data}
-                        levels={levels.data}
+                        groups={groups.data}
                         classrooms={classrooms.data}
                         submitLabel="Créer"
                     />
@@ -188,9 +188,7 @@ export default function TimeslotsIndex({ timeslots, teachers, subjects, levels, 
                     <TimeslotForm
                         form={editForm}
                         onSubmit={handleEdit}
-                        teachers={teachers.data}
-                        subjects={subjects.data}
-                        levels={levels.data}
+                        groups={groups.data}
                         classrooms={classrooms.data}
                         submitLabel="Enregistrer"
                     />
@@ -203,14 +201,12 @@ export default function TimeslotsIndex({ timeslots, teachers, subjects, levels, 
 type TimeslotFormProps = {
     form: ReturnType<typeof useForm<TimeslotFormData>>;
     onSubmit: (e: FormEvent) => void;
-    teachers: Teacher[];
-    subjects: Subject[];
-    levels: Level[];
+    groups: Group[];
     classrooms: Classroom[];
     submitLabel: string;
 };
 
-function TimeslotForm({ form, onSubmit, teachers, subjects, levels, classrooms, submitLabel }: TimeslotFormProps) {
+function TimeslotForm({ form, onSubmit, groups, classrooms, submitLabel }: TimeslotFormProps) {
     return (
         <form onSubmit={onSubmit}>
             <div className="grid gap-4 py-4">
@@ -253,54 +249,22 @@ function TimeslotForm({ form, onSubmit, teachers, subjects, levels, classrooms, 
                 </div>
 
                 <div className="grid gap-2">
-                    <Label>Professeur</Label>
-                    <Select value={form.data.teacher_id} onValueChange={(v) => form.setData('teacher_id', v)}>
+                    <Label>Groupe</Label>
+                    <Select value={form.data.group_id} onValueChange={(v) => form.setData('group_id', v)}>
                         <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner un professeur" />
+                            <SelectValue placeholder="Sélectionner un groupe" />
                         </SelectTrigger>
                         <SelectContent>
-                            {teachers.map((teacher) => (
-                                <SelectItem key={teacher.id} value={String(teacher.id)}>
-                                    {teacher.full_name}
+                            {groups.map((group) => (
+                                <SelectItem key={group.id} value={String(group.id)}>
+                                    {group.name}
+                                    {group.subject?.name ? ` · ${group.subject.name}` : ''}
+                                    {group.teacher?.full_name ? ` · ${group.teacher.full_name}` : ''}
                                 </SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
-                    <InputError message={form.errors.teacher_id} />
-                </div>
-
-                <div className="grid gap-2">
-                    <Label>Matière</Label>
-                    <Select value={form.data.subject_id} onValueChange={(v) => form.setData('subject_id', v)}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner une matière" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {subjects.map((subject) => (
-                                <SelectItem key={subject.id} value={String(subject.id)}>
-                                    {subject.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <InputError message={form.errors.subject_id} />
-                </div>
-
-                <div className="grid gap-2">
-                    <Label>Niveau</Label>
-                    <Select value={form.data.level_id} onValueChange={(v) => form.setData('level_id', v)}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner un niveau" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {levels.map((level) => (
-                                <SelectItem key={level.id} value={String(level.id)}>
-                                    {level.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <InputError message={form.errors.level_id} />
+                    <InputError message={form.errors.group_id} />
                 </div>
 
                 <div className="grid gap-2">

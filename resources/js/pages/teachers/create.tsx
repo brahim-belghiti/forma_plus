@@ -2,21 +2,19 @@ import { Head, useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { index, store } from '@/actions/App/Http/Controllers/TeacherController';
 import TeacherForm from './partials/teacher-form';
-import type { Level, Subject } from '@/types';
+import type { Subject } from '@/types';
 
 type Props = {
-    levels: { data: Level[] };
     subjects: { data: Subject[] };
 };
 
-export default function CreateTeacher({ levels, subjects }: Props) {
+export default function CreateTeacher({ subjects }: Props) {
     const form = useForm({
         first_name: '',
         last_name: '',
         phone: '',
         salary_rate: '',
         subject_ids: [] as number[],
-        level_ids: [] as number[],
     });
 
     function handleSubmit(e: FormEvent) {
@@ -32,7 +30,6 @@ export default function CreateTeacher({ levels, subjects }: Props) {
                 data={form.data}
                 errors={form.errors}
                 processing={form.processing}
-                levels={levels}
                 subjects={subjects}
                 setData={form.setData}
                 onSubmit={handleSubmit}

@@ -4,16 +4,15 @@ import { index, update } from '@/actions/App/Http/Controllers/StudentController'
 import StudentBasicForm from './partials/student-basic-form';
 import StudentEnrollments from './partials/student-enrollments';
 import { Separator } from '@/components/ui/separator';
-import type { Student, Level, Subject, Teacher } from '@/types';
+import type { Student, Level, Group } from '@/types';
 
 type Props = {
     student: { data: Student };
     levels: { data: Level[] };
-    subjects: { data: Subject[] };
-    teachers: { data: Teacher[] };
+    groups: { data: Group[] };
 };
 
-export default function EditStudent({ student, levels, subjects, teachers }: Props) {
+export default function EditStudent({ student, levels, groups }: Props) {
     const s = student.data;
 
     const form = useForm({
@@ -47,11 +46,7 @@ export default function EditStudent({ student, levels, subjects, teachers }: Pro
 
             <Separator className="my-8" />
 
-            <StudentEnrollments
-                student={s}
-                subjects={subjects.data}
-                teachers={teachers.data}
-            />
+            <StudentEnrollments student={s} groups={groups.data} />
         </>
     );
 }

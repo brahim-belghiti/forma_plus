@@ -15,13 +15,17 @@ class SubjectFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->randomElement([
+            'name' => fake()->unique()->randomElement([
                 'Mathematiques',
                 'Physique-Chimie',
                 'Sciences de la Vie et de la Terre',
                 'Francais',
                 'Anglais',
                 'Arabe',
+                'Histoire-Geographie',
+                'Philosophie',
+                'Economie',
+                'Informatique',
             ]),
             'school_id' => School::factory(),
             'level_id' => Level::factory(),

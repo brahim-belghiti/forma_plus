@@ -55,7 +55,6 @@ export default function TeachersIndex({ teachers, filters }: Props) {
                             <TableHead>Nom</TableHead>
                             <TableHead>Téléphone</TableHead>
                             <TableHead>Matières</TableHead>
-                            <TableHead>Niveaux</TableHead>
                             {isAdmin && <TableHead className="text-center">Taux de salaire</TableHead>}
                             <TableHead className="w-24"></TableHead>
                         </TableRow>
@@ -63,7 +62,7 @@ export default function TeachersIndex({ teachers, filters }: Props) {
                     <TableBody>
                         {teachers.data.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={isAdmin ? 6 : 5} className="text-center text-muted-foreground py-8">
+                                <TableCell colSpan={isAdmin ? 5 : 4} className="text-center text-muted-foreground py-8">
                                     Aucun professeur trouvé.
                                 </TableCell>
                             </TableRow>
@@ -75,14 +74,10 @@ export default function TeachersIndex({ teachers, filters }: Props) {
                                     <TableCell>
                                         <div className="flex flex-wrap gap-1">
                                             {teacher.subjects?.map((s) => (
-                                                <Badge key={s.id} variant="secondary">{s.name}</Badge>
-                                            ))}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex flex-wrap gap-1">
-                                            {teacher.levels?.map((l) => (
-                                                <Badge key={l.id} variant="outline">{l.name}</Badge>
+                                                <Badge key={s.id} variant="secondary">
+                                                    {s.name}
+                                                    {s.level?.name ? ` · ${s.level.name}` : ''}
+                                                </Badge>
                                             ))}
                                         </div>
                                     </TableCell>

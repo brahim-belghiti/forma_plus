@@ -4,23 +4,25 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Spinner } from '@/components/ui/spinner';
 import InputError from '@/components/input-error';
 import { index, store, update, destroy } from '@/actions/App/Http/Controllers/SubjectController';
-import type { Subject } from '@/types';
+import type { Level, Subject } from '@/types';
 import { Pencil, Trash2, Plus } from 'lucide-react';
 
 type Props = {
     subjects: { data: Subject[] };
+    levels: { data: Level[] };
 };
 
-export default function SubjectsIndex({ subjects }: Props) {
+export default function SubjectsIndex({ subjects, levels }: Props) {
     const [showCreate, setShowCreate] = useState(false);
     const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
 
-    const createForm = useForm({ name: '' });
-    const editForm = useForm({ name: '' });
+    const createForm = useForm({ name: '', level_id: '' });
+    const editForm = useForm({ name: '', level_id: '' });
 
     function handleCreate(e: FormEvent) {
         e.preventDefault();
@@ -50,6 +52,7 @@ export default function SubjectsIndex({ subjects }: Props) {
 
     function openEdit(subject: Subject) {
         editForm.setData('name', subject.name);
+        editForm.setData('level_id', String(subject.level_id));
         setEditingSubject(subject);
     }
 
@@ -58,18 +61,24 @@ export default function SubjectsIndex({ subjects }: Props) {
             <Head title="Matières" />
             <div className="flex items-center justify-between mb-6">
                 <h1 className="text-2xl font-semibold">Matières</h1>
-                <Button onClick={() => setShowCreate(true)}>
+                <Button onClick={() => setShowCreate(true)} disabled={levels.data.length === 0}>
                     <Plus className="mr-2 h-4 w-4" />
                     Ajouter une matière
                 </Button>
             </div>
+
+            {levels.data.length === 0 && (
+                <p className="mb-4 text-sm text-muted-foreground">
+                    Ajoutez d'abord un niveau avant de créer des matières.
+                </p>
+            )}
 
             <div className="rounded-lg border">
                 <Table>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Nom</TableHead>
-                            <TableHead className="w-32 text-center">Niveaux</TableHead>
+                            <TableHead>Niveau</TableHead>
                             <TableHead className="w-24"></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -84,7 +93,7 @@ export default function SubjectsIndex({ subjects }: Props) {
                             subjects.data.map((subject) => (
                                 <TableRow key={subject.id}>
                                     <TableCell className="font-medium">{subject.name}</TableCell>
-                                    <TableCell className="text-center">{subject.levels_count ?? 0}</TableCell>
+                                    <TableCell>{subject.level?.name ?? '—'}</TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-1 justify-end">
                                             <Button variant="ghost" size="icon" onClick={() => openEdit(subject)}>
@@ -120,6 +129,22 @@ export default function SubjectsIndex({ subjects }: Props) {
                                 />
                                 <InputError message={createForm.errors.name} />
                             </div>
+                            <div className="grid gap-2">
+                                <Label>Niveau</Label>
+                                <Select value={createForm.data.level_id} onValueChange={(v) => createForm.setData('level_id', v)}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Sélectionner un niveau" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {levels.data.map((level) => (
+                                            <SelectItem key={level.id} value={String(level.id)}>
+                                                {level.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <InputError message={createForm.errors.level_id} />
+                            </div>
                         </div>
                         <DialogFooter>
                             <DialogClose asChild>
@@ -150,6 +175,22 @@ export default function SubjectsIndex({ subjects }: Props) {
                                     autoFocus
                                 />
                                 <InputError message={editForm.errors.name} />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label>Niveau</Label>
+                                <Select value={editForm.data.level_id} onValueChange={(v) => editForm.setData('level_id', v)}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Sélectionner un niveau" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {levels.data.map((level) => (
+                                            <SelectItem key={level.id} value={String(level.id)}>
+                                                {level.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <InputError message={editForm.errors.level_id} />
                             </div>
                         </div>
                         <DialogFooter>

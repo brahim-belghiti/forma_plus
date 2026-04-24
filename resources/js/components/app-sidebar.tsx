@@ -19,6 +19,7 @@ import { index as studentsIndex } from '@/actions/App/Http/Controllers/StudentCo
 import { index as subjectsIndex } from '@/actions/App/Http/Controllers/SubjectController';
 import { index as teachersIndex } from '@/actions/App/Http/Controllers/TeacherController';
 import { index as classroomsIndex } from '@/actions/App/Http/Controllers/ClassroomController';
+import { index as groupsIndex } from '@/actions/App/Http/Controllers/GroupController';
 import { index as timeslotsIndex } from '@/actions/App/Http/Controllers/TimeslotController';
 import { index as paymentsIndex } from '@/actions/App/Http/Controllers/PaymentController';
 import { index as salariesIndex } from '@/actions/App/Http/Controllers/SalaryController';
@@ -53,6 +54,11 @@ const mainNavItems: NavItemWithRole[] = [
         title: 'Professeurs',
         href: teachersIndex.url(),
         icon: UserCheck,
+    },
+    {
+        title: 'Groupes',
+        href: groupsIndex.url(),
+        icon: FolderGit2,
     },
     {
         title: 'Salles',
