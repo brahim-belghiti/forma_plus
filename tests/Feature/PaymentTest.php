@@ -1,21 +1,45 @@
 <?php
 
+use App\Models\Enrollment;
+use App\Models\Group;
+use App\Models\Level;
 use App\Models\Payment;
 use App\Models\School;
 use App\Models\Student;
+use App\Models\Subject;
+use App\Models\Teacher;
 use App\Models\User;
 
 beforeEach(function () {
     $this->school = School::factory()->create();
     $this->user = User::factory()->create(['school_id' => $this->school->id]);
     $this->student = Student::factory()->create(['school_id' => $this->school->id]);
+    $this->teacher = Teacher::factory()->create(['school_id' => $this->school->id]);
+    $this->level = Level::factory()->create(['school_id' => $this->school->id]);
+    $this->subject = Subject::factory()->create([
+        'school_id' => $this->school->id,
+        'level_id' => $this->level->id,
+    ]);
+    $this->group = Group::factory()->create([
+        'school_id' => $this->school->id,
+        'subject_id' => $this->subject->id,
+        'teacher_id' => $this->teacher->id,
+    ]);
+    $this->enrollment = Enrollment::factory()->create([
+        'school_id' => $this->school->id,
+        'student_id' => $this->student->id,
+        'group_id' => $this->group->id,
+        'monthly_fee' => 300,
+    ]);
 });
 
 test('authenticated user can view payments index', function () {
     Payment::factory()->count(3)->create([
         'school_id' => $this->school->id,
-        'student_id' => $this->student->id,
-    ]);
+        'enrollment_id' => $this->enrollment->id,
+    ])->each(function ($payment, $index) {
+        $payment->update(['period_month' => $index + 1, 'period_year' => 2026]);
+    });
 
     $response = $this->actingAs($this->user)->get(route('payments.index'));
 
@@ -23,7 +47,6 @@ test('authenticated user can view payments index', function () {
     $response->assertInertia(fn ($page) => $page
         ->component('payments/index')
         ->has('payments.data', 3)
-        ->has('students.data')
         ->has('filters')
     );
 });
@@ -31,7 +54,7 @@ test('authenticated user can view payments index', function () {
 test('user only sees payments from their school', function () {
     Payment::factory()->create([
         'school_id' => $this->school->id,
-        'student_id' => $this->student->id,
+        'enrollment_id' => $this->enrollment->id,
     ]);
     Payment::factory()->create();
 
@@ -45,13 +68,13 @@ test('user only sees payments from their school', function () {
 test('user can filter payments by month and year', function () {
     Payment::factory()->create([
         'school_id' => $this->school->id,
-        'student_id' => $this->student->id,
+        'enrollment_id' => $this->enrollment->id,
         'period_month' => 3,
         'period_year' => 2026,
     ]);
     Payment::factory()->create([
         'school_id' => $this->school->id,
-        'student_id' => $this->student->id,
+        'enrollment_id' => $this->enrollment->id,
         'period_month' => 4,
         'period_year' => 2026,
     ]);
@@ -74,13 +97,23 @@ test('user can search payments by student name', function () {
         'first_name' => 'Sara',
         'last_name' => 'Other',
     ]);
-    Payment::factory()->create([
+    $e1 = Enrollment::factory()->create([
         'school_id' => $this->school->id,
         'student_id' => $student1->id,
+        'group_id' => $this->group->id,
+    ]);
+    $e2 = Enrollment::factory()->create([
+        'school_id' => $this->school->id,
+        'student_id' => $student2->id,
+        'group_id' => $this->group->id,
     ]);
     Payment::factory()->create([
         'school_id' => $this->school->id,
-        'student_id' => $student2->id,
+        'enrollment_id' => $e1->id,
+    ]);
+    Payment::factory()->create([
+        'school_id' => $this->school->id,
+        'enrollment_id' => $e2->id,
     ]);
 
     $response = $this->actingAs($this->user)->get(route('payments.index', ['search' => 'Ahmed']));
@@ -92,7 +125,7 @@ test('user can search payments by student name', function () {
 
 test('user can create a payment', function () {
     $response = $this->actingAs($this->user)->post(route('payments.store'), [
-        'student_id' => $this->student->id,
+        'enrollment_id' => $this->enrollment->id,
         'amount' => 500.00,
         'period_month' => 4,
         'period_year' => 2026,
@@ -103,22 +136,21 @@ test('user can create a payment', function () {
     $response->assertRedirect();
     $this->assertDatabaseHas('payments', [
         'school_id' => $this->school->id,
-        'student_id' => $this->student->id,
+        'enrollment_id' => $this->enrollment->id,
         'amount' => 500.00,
         'period_month' => 4,
         'period_year' => 2026,
     ]);
 });
 
-test('payment requires student, amount, period, and date', function () {
-    $response = $this->actingAs($this->user)->post(route('payments.store'), []);
-
-    $response->assertSessionHasErrors(['student_id', 'amount', 'period_month', 'period_year', 'paid_at']);
+test('payment requires enrollment, amount, period, and date', function () {
+    $this->actingAs($this->user)->post(route('payments.store'), [])
+        ->assertSessionHasErrors(['enrollment_id', 'amount', 'period_month', 'period_year', 'paid_at']);
 });
 
 test('payment amount must be positive', function () {
     $response = $this->actingAs($this->user)->post(route('payments.store'), [
-        'student_id' => $this->student->id,
+        'enrollment_id' => $this->enrollment->id,
         'amount' => 0,
         'period_month' => 4,
         'period_year' => 2026,
@@ -128,18 +160,34 @@ test('payment amount must be positive', function () {
     $response->assertSessionHasErrors('amount');
 });
 
-test('user can update a payment', function () {
+test('cannot pay the same enrollment period twice', function () {
+    Payment::factory()->create([
+        'school_id' => $this->school->id,
+        'enrollment_id' => $this->enrollment->id,
+        'period_month' => 4,
+        'period_year' => 2026,
+    ]);
+
+    $response = $this->actingAs($this->user)->post(route('payments.store'), [
+        'enrollment_id' => $this->enrollment->id,
+        'amount' => 300,
+        'period_month' => 4,
+        'period_year' => 2026,
+        'paid_at' => '2026-04-22',
+    ]);
+
+    $response->assertSessionHasErrors('period_month');
+});
+
+test('user can update a payment amount', function () {
     $payment = Payment::factory()->create([
         'school_id' => $this->school->id,
-        'student_id' => $this->student->id,
+        'enrollment_id' => $this->enrollment->id,
         'amount' => 300,
     ]);
 
     $response = $this->actingAs($this->user)->put(route('payments.update', $payment), [
-        'student_id' => $this->student->id,
         'amount' => 500,
-        'period_month' => $payment->period_month,
-        'period_year' => $payment->period_year,
         'paid_at' => $payment->paid_at->toDateString(),
     ]);
 
@@ -150,7 +198,7 @@ test('user can update a payment', function () {
 test('user can delete a payment', function () {
     $payment = Payment::factory()->create([
         'school_id' => $this->school->id,
-        'student_id' => $this->student->id,
+        'enrollment_id' => $this->enrollment->id,
     ]);
 
     $response = $this->actingAs($this->user)->delete(route('payments.destroy', $payment));
@@ -160,7 +208,5 @@ test('user can delete a payment', function () {
 });
 
 test('guest cannot access payments', function () {
-    $response = $this->get(route('payments.index'));
-
-    $response->assertRedirect(route('login'));
+    $this->get(route('payments.index'))->assertRedirect(route('login'));
 });

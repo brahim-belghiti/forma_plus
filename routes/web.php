@@ -34,6 +34,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('classrooms', ClassroomController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('groups', GroupController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('timeslots', TimeslotController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::get('payments/unpaid', [PaymentController::class, 'unpaid'])->name('payments.unpaid');
     Route::resource('payments', PaymentController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('salaries', SalaryController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('expenses', ExpenseController::class)->only(['index', 'store', 'update', 'destroy']);

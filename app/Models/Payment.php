@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['student_id', 'amount', 'period_month', 'period_year', 'paid_at', 'notes', 'school_id'])]
+#[Fillable(['school_id', 'enrollment_id', 'amount', 'period_month', 'period_year', 'paid_at', 'notes'])]
 class Payment extends Model
 {
     /** @use HasFactory<PaymentFactory> */
@@ -23,8 +23,8 @@ class Payment extends Model
         ];
     }
 
-    public function student(): BelongsTo
+    public function enrollment(): BelongsTo
     {
-        return $this->belongsTo(Student::class);
+        return $this->belongsTo(Enrollment::class);
     }
 }

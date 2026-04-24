@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Enrollment;
 use App\Models\Payment;
 use App\Models\School;
-use App\Models\Student;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -19,7 +19,7 @@ class PaymentFactory extends Factory
     {
         return [
             'school_id' => School::factory(),
-            'student_id' => Student::factory(),
+            'enrollment_id' => Enrollment::factory(),
             'amount' => fake()->randomFloat(2, 100, 1000),
             'period_month' => fake()->numberBetween(1, 12),
             'period_year' => fake()->numberBetween(2024, 2026),

@@ -14,13 +14,13 @@ class PaymentResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'student_id' => $this->student_id,
+            'enrollment_id' => $this->enrollment_id,
             'amount' => $this->amount,
             'period_month' => $this->period_month,
             'period_year' => $this->period_year,
             'paid_at' => $this->paid_at->toDateString(),
             'notes' => $this->notes,
-            'student' => new StudentResource($this->whenLoaded('student')),
+            'enrollment' => new EnrollmentResource($this->whenLoaded('enrollment')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

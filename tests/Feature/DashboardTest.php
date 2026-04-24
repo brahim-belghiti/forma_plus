@@ -1,10 +1,14 @@
 <?php
 
+use App\Models\Enrollment;
 use App\Models\Expense;
+use App\Models\Group;
+use App\Models\Level;
 use App\Models\Payment;
 use App\Models\Salary;
 use App\Models\School;
 use App\Models\Student;
+use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\User;
 
@@ -34,8 +38,20 @@ test('dashboard shows financial summary stats', function () {
     $user = User::factory()->admin()->create(['school_id' => $school->id]);
     $student = Student::factory()->create(['school_id' => $school->id]);
     $teacher = Teacher::factory()->create(['school_id' => $school->id]);
+    $level = Level::factory()->create(['school_id' => $school->id]);
+    $subject = Subject::factory()->create(['school_id' => $school->id, 'level_id' => $level->id]);
+    $group = Group::factory()->create([
+        'school_id' => $school->id,
+        'subject_id' => $subject->id,
+        'teacher_id' => $teacher->id,
+    ]);
+    $enrollment = Enrollment::factory()->create([
+        'school_id' => $school->id,
+        'student_id' => $student->id,
+        'group_id' => $group->id,
+    ]);
 
-    Payment::factory()->create(['school_id' => $school->id, 'student_id' => $student->id, 'amount' => 1000]);
+    Payment::factory()->create(['school_id' => $school->id, 'enrollment_id' => $enrollment->id, 'amount' => 1000]);
     Salary::factory()->create(['school_id' => $school->id, 'teacher_id' => $teacher->id, 'amount' => 400]);
     Expense::factory()->create(['school_id' => $school->id, 'amount' => 100]);
 

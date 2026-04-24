@@ -21,7 +21,7 @@ import { index as teachersIndex } from '@/actions/App/Http/Controllers/TeacherCo
 import { index as classroomsIndex } from '@/actions/App/Http/Controllers/ClassroomController';
 import { index as groupsIndex } from '@/actions/App/Http/Controllers/GroupController';
 import { index as timeslotsIndex } from '@/actions/App/Http/Controllers/TimeslotController';
-import { index as paymentsIndex } from '@/actions/App/Http/Controllers/PaymentController';
+import { unpaid as paymentsUnpaid } from '@/actions/App/Http/Controllers/PaymentController';
 import { index as salariesIndex } from '@/actions/App/Http/Controllers/SalaryController';
 import { index as expensesIndex } from '@/actions/App/Http/Controllers/ExpenseController';
 import type { NavItem } from '@/types';
@@ -72,7 +72,7 @@ const mainNavItems: NavItemWithRole[] = [
     },
     {
         title: 'Paiements',
-        href: paymentsIndex.url(),
+        href: paymentsUnpaid.url(),
         icon: CreditCard,
     },
     {

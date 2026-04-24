@@ -1,4 +1,4 @@
-import { Head, useForm, router } from '@inertiajs/react';
+import { Head, useForm, router, Link } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,9 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Spinner } from '@/components/ui/spinner';
 import InputError from '@/components/input-error';
-import { index, store, update, destroy } from '@/actions/App/Http/Controllers/PaymentController';
-import type { Payment, Student, PaginatedData } from '@/types';
-import { Pencil, Trash2, Plus } from 'lucide-react';
+import { index, unpaid, update, destroy } from '@/actions/App/Http/Controllers/PaymentController';
+import type { Payment, PaginatedData } from '@/types';
+import { Pencil, Trash2, Receipt } from 'lucide-react';
 import { useDebouncedCallback } from '@/hooks/use-debounced-callback';
 
 const MONTHS = [
@@ -29,9 +29,10 @@ const MONTHS = [
     { value: 12, label: 'Décembre' },
 ];
 
+const currentYear = String(new Date().getFullYear());
+
 type Props = {
     payments: PaginatedData<Payment>;
-    students: { data: Student[] };
     filters: {
         search?: string;
         month?: string;
@@ -39,37 +40,16 @@ type Props = {
     };
 };
 
-type PaymentFormData = {
-    student_id: string;
+type EditFormData = {
     amount: string;
-    period_month: string;
-    period_year: string;
     paid_at: string;
     notes: string;
 };
 
-function todayString() {
-    return new Date().toISOString().slice(0, 10);
-}
-
-const currentMonth = String(new Date().getMonth() + 1);
-const currentYear = String(new Date().getFullYear());
-
-const emptyForm: PaymentFormData = {
-    student_id: '',
-    amount: '',
-    period_month: currentMonth,
-    period_year: currentYear,
-    paid_at: todayString(),
-    notes: '',
-};
-
-export default function PaymentsIndex({ payments, students, filters }: Props) {
-    const [showCreate, setShowCreate] = useState(false);
+export default function PaymentsIndex({ payments, filters }: Props) {
     const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
 
-    const createForm = useForm<PaymentFormData>({ ...emptyForm });
-    const editForm = useForm<PaymentFormData>({ ...emptyForm });
+    const editForm = useForm<EditFormData>({ amount: '', paid_at: '', notes: '' });
 
     const handleSearch = useDebouncedCallback((value: string) => {
         router.get(index.url(), { ...filters, search: value || undefined }, { preserveState: true, replace: true });
@@ -85,25 +65,11 @@ export default function PaymentsIndex({ payments, students, filters }: Props) {
         router.get(index.url(), { ...filters, year: value }, { preserveState: true, replace: true });
     }
 
-    function handleCreate(e: FormEvent) {
-        e.preventDefault();
-        createForm.post(store.url(), {
-            onSuccess: () => {
-                setShowCreate(false);
-                createForm.reset();
-                createForm.setData({ ...emptyForm });
-            },
-        });
-    }
-
     function handleEdit(e: FormEvent) {
         e.preventDefault();
         if (!editingPayment) return;
         editForm.put(update.url(editingPayment.id), {
-            onSuccess: () => {
-                setEditingPayment(null);
-                editForm.reset();
-            },
+            onSuccess: () => setEditingPayment(null),
         });
     }
 
@@ -114,10 +80,7 @@ export default function PaymentsIndex({ payments, students, filters }: Props) {
 
     function openEdit(payment: Payment) {
         editForm.setData({
-            student_id: String(payment.student_id),
             amount: payment.amount,
-            period_month: String(payment.period_month),
-            period_year: String(payment.period_year),
             paid_at: payment.paid_at,
             notes: payment.notes ?? '',
         });
@@ -132,12 +95,14 @@ export default function PaymentsIndex({ payments, students, filters }: Props) {
 
     return (
         <>
-            <Head title="Paiements" />
+            <Head title="Historique des paiements" />
             <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-semibold">Paiements</h1>
-                <Button onClick={() => setShowCreate(true)}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Enregistrer un paiement
+                <h1 className="text-2xl font-semibold">Historique des paiements</h1>
+                <Button asChild variant="outline">
+                    <Link href={unpaid.url()}>
+                        <Receipt className="mr-2 h-4 w-4" />
+                        Voir les impayés
+                    </Link>
                 </Button>
             </div>
 
@@ -182,28 +147,30 @@ export default function PaymentsIndex({ payments, students, filters }: Props) {
                     <TableHeader>
                         <TableRow>
                             <TableHead>Élève</TableHead>
+                            <TableHead>Groupe</TableHead>
+                            <TableHead>Matière</TableHead>
                             <TableHead>Période</TableHead>
                             <TableHead>Montant</TableHead>
                             <TableHead>Payé le</TableHead>
-                            <TableHead>Remarques</TableHead>
                             <TableHead className="w-24"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {payments.data.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                                <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                                     Aucun paiement trouvé.
                                 </TableCell>
                             </TableRow>
                         ) : (
                             payments.data.map((payment) => (
                                 <TableRow key={payment.id}>
-                                    <TableCell className="font-medium">{payment.student?.full_name}</TableCell>
+                                    <TableCell className="font-medium">{payment.enrollment?.student?.full_name ?? '-'}</TableCell>
+                                    <TableCell>{payment.enrollment?.group?.name ?? '-'}</TableCell>
+                                    <TableCell>{payment.enrollment?.group?.subject?.name ?? '-'}</TableCell>
                                     <TableCell>{monthLabel(payment.period_month)} {payment.period_year}</TableCell>
                                     <TableCell>{Number(payment.amount).toFixed(2).replace('.', ',')} DH</TableCell>
                                     <TableCell>{payment.paid_at}</TableCell>
-                                    <TableCell className="max-w-xs truncate">{payment.notes ?? '-'}</TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-1 justify-end">
                                             <Button variant="ghost" size="icon" onClick={() => openEdit(payment)}>
@@ -241,151 +208,69 @@ export default function PaymentsIndex({ payments, students, filters }: Props) {
                 </div>
             )}
 
-            <Dialog open={showCreate} onOpenChange={setShowCreate}>
-                <DialogContent className="sm:max-w-lg">
-                    <DialogHeader>
-                        <DialogTitle>Enregistrer un paiement</DialogTitle>
-                    </DialogHeader>
-                    <PaymentForm
-                        form={createForm}
-                        onSubmit={handleCreate}
-                        students={students.data}
-                        submitLabel="Créer"
-                    />
-                </DialogContent>
-            </Dialog>
-
             <Dialog open={!!editingPayment} onOpenChange={(open) => !open && setEditingPayment(null)}>
                 <DialogContent className="sm:max-w-lg">
                     <DialogHeader>
                         <DialogTitle>Modifier le paiement</DialogTitle>
                     </DialogHeader>
-                    <PaymentForm
-                        form={editForm}
-                        onSubmit={handleEdit}
-                        students={students.data}
-                        submitLabel="Enregistrer"
-                    />
+                    {editingPayment && (
+                        <form onSubmit={handleEdit}>
+                            <div className="grid gap-4 py-4">
+                                <p className="text-sm text-muted-foreground">
+                                    {editingPayment.enrollment?.student?.full_name} · {editingPayment.enrollment?.group?.name}
+                                    <br />
+                                    Période : {monthLabel(editingPayment.period_month)} {editingPayment.period_year}
+                                </p>
+                                <div className="grid gap-2">
+                                    <Label>Montant (DH)</Label>
+                                    <Input
+                                        type="number"
+                                        step="0.01"
+                                        min="0.01"
+                                        value={editForm.data.amount}
+                                        onChange={(e) => editForm.setData('amount', e.target.value)}
+                                    />
+                                    <InputError message={editForm.errors.amount} />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label>Payé le</Label>
+                                    <Input
+                                        type="date"
+                                        value={editForm.data.paid_at}
+                                        onChange={(e) => editForm.setData('paid_at', e.target.value)}
+                                    />
+                                    <InputError message={editForm.errors.paid_at} />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label>Remarques</Label>
+                                    <Textarea
+                                        value={editForm.data.notes}
+                                        onChange={(e) => editForm.setData('notes', e.target.value)}
+                                        rows={2}
+                                    />
+                                    <InputError message={editForm.errors.notes} />
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <DialogClose asChild>
+                                    <Button variant="outline" type="button">Annuler</Button>
+                                </DialogClose>
+                                <Button type="submit" disabled={editForm.processing}>
+                                    {editForm.processing && <Spinner />}
+                                    Enregistrer
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    )}
                 </DialogContent>
             </Dialog>
         </>
     );
 }
 
-type PaymentFormProps = {
-    form: ReturnType<typeof useForm<PaymentFormData>>;
-    onSubmit: (e: FormEvent) => void;
-    students: Student[];
-    submitLabel: string;
-};
-
-function PaymentForm({ form, onSubmit, students, submitLabel }: PaymentFormProps) {
-    const yearOptions = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i);
-
-    return (
-        <form onSubmit={onSubmit}>
-            <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                    <Label>Élève</Label>
-                    <Select value={form.data.student_id} onValueChange={(v) => form.setData('student_id', v)}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner un élève" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {students.map((student) => (
-                                <SelectItem key={student.id} value={String(student.id)}>
-                                    {student.full_name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <InputError message={form.errors.student_id} />
-                </div>
-
-                <div className="grid gap-2">
-                    <Label>Montant (DH)</Label>
-                    <Input
-                        type="number"
-                        step="0.01"
-                        min="0.01"
-                        value={form.data.amount}
-                        onChange={(e) => form.setData('amount', e.target.value)}
-                        placeholder="0.00"
-                    />
-                    <InputError message={form.errors.amount} />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                        <Label>Mois</Label>
-                        <Select value={form.data.period_month} onValueChange={(v) => form.setData('period_month', v)}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Mois" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {MONTHS.map((m) => (
-                                    <SelectItem key={m.value} value={String(m.value)}>
-                                        {m.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <InputError message={form.errors.period_month} />
-                    </div>
-                    <div className="grid gap-2">
-                        <Label>Année</Label>
-                        <Select value={form.data.period_year} onValueChange={(v) => form.setData('period_year', v)}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Année" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {yearOptions.map((y) => (
-                                    <SelectItem key={y} value={String(y)}>
-                                        {y}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <InputError message={form.errors.period_year} />
-                    </div>
-                </div>
-
-                <div className="grid gap-2">
-                    <Label>Payé le</Label>
-                    <Input
-                        type="date"
-                        value={form.data.paid_at}
-                        onChange={(e) => form.setData('paid_at', e.target.value)}
-                    />
-                    <InputError message={form.errors.paid_at} />
-                </div>
-
-                <div className="grid gap-2">
-                    <Label>Remarques</Label>
-                    <Textarea
-                        value={form.data.notes}
-                        onChange={(e) => form.setData('notes', e.target.value)}
-                        placeholder="Remarques facultatives..."
-                        rows={2}
-                    />
-                    <InputError message={form.errors.notes} />
-                </div>
-            </div>
-            <DialogFooter>
-                <DialogClose asChild>
-                    <Button variant="outline" type="button">Annuler</Button>
-                </DialogClose>
-                <Button type="submit" disabled={form.processing}>
-                    {form.processing && <Spinner />}
-                    {submitLabel}
-                </Button>
-            </DialogFooter>
-        </form>
-    );
-}
-
 PaymentsIndex.layout = {
     breadcrumbs: [
         { title: 'Paiements', href: index.url() },
+        { title: 'Historique', href: index.url() },
     ],
 };

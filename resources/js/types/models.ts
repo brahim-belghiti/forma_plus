@@ -97,15 +97,21 @@ export type Timeslot = {
 
 export type Payment = {
     id: number;
-    student_id: number;
+    enrollment_id: number;
     amount: string;
     period_month: number;
     period_year: number;
     paid_at: string;
     notes: string | null;
-    student?: Student;
+    enrollment?: Enrollment;
     created_at: string;
     updated_at: string;
+};
+
+export type UnpaidRow = {
+    enrollment: Enrollment;
+    unpaid_periods: Array<{ year: number; month: number }>;
+    total_due: number;
 };
 
 export type Salary = {

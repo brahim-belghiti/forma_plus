@@ -17,10 +17,7 @@ class UpdatePaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'student_id' => ['required', 'exists:students,id'],
             'amount' => ['required', 'numeric', 'min:0.01'],
-            'period_month' => ['required', 'integer', 'between:1,12'],
-            'period_year' => ['required', 'integer', 'min:2020'],
             'paid_at' => ['required', 'date'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ];
