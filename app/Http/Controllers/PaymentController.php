@@ -61,7 +61,7 @@ class PaymentController extends Controller
             $totalDue = count($periods) * (float) $enrollment->monthly_fee;
 
             $rows[] = [
-                'enrollment' => (new EnrollmentResource($enrollment))->toArray($request),
+                'enrollment' => json_decode((new EnrollmentResource($enrollment))->toJson(), true),
                 'unpaid_periods' => $periods,
                 'total_due' => $totalDue,
             ];

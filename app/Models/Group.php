@@ -50,6 +50,11 @@ class Group extends Model
         return $this->hasMany(Timeslot::class);
     }
 
+    public function classSessions(): HasMany
+    {
+        return $this->hasMany(ClassSession::class);
+    }
+
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('active', true);

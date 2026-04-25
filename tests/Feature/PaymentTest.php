@@ -34,12 +34,14 @@ beforeEach(function () {
 });
 
 test('authenticated user can view payments index', function () {
-    Payment::factory()->count(3)->create([
-        'school_id' => $this->school->id,
-        'enrollment_id' => $this->enrollment->id,
-    ])->each(function ($payment, $index) {
-        $payment->update(['period_month' => $index + 1, 'period_year' => 2026]);
-    });
+    foreach ([1, 2, 3] as $month) {
+        Payment::factory()->create([
+            'school_id' => $this->school->id,
+            'enrollment_id' => $this->enrollment->id,
+            'period_month' => $month,
+            'period_year' => 2026,
+        ]);
+    }
 
     $response = $this->actingAs($this->user)->get(route('payments.index'));
 

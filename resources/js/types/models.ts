@@ -114,6 +114,40 @@ export type UnpaidRow = {
     total_due: number;
 };
 
+export type Attendance = {
+    id: number;
+    class_session_id: number;
+    student_id: number;
+    present: boolean;
+    notes: string | null;
+    student?: Student;
+};
+
+export type ClassSession = {
+    id: number;
+    group_id: number;
+    date: string;
+    teacher_present: boolean;
+    notes: string | null;
+    group?: Group;
+    attendances?: Attendance[];
+    present_count?: number;
+    attendances_count?: number;
+    created_at: string;
+    updated_at: string;
+};
+
+export type SalaryContext = {
+    teacher_id: number;
+    month: number;
+    year: number;
+    sessions_count: number;
+    present_attendances: number;
+    fees_collected: number;
+    rate: number;
+    suggested_amount: number;
+} | null;
+
 export type Salary = {
     id: number;
     teacher_id: number;

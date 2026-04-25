@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ClassroomController;
+use App\Http\Controllers\ClassSessionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\ExpenseController;
@@ -34,6 +35,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('classrooms', ClassroomController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('groups', GroupController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('timeslots', TimeslotController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('sessions', ClassSessionController::class)
+        ->parameters(['sessions' => 'class_session'])
+        ->only(['index', 'show', 'store', 'update', 'destroy'])
+        ->names([
+            'index' => 'sessions.index',
+            'show' => 'sessions.show',
+            'store' => 'sessions.store',
+            'update' => 'sessions.update',
+            'destroy' => 'sessions.destroy',
+        ]);
+    Route::put('sessions/{class_session}/attendance', [ClassSessionController::class, 'upsertAttendance'])
+        ->name('sessions.attendance');
     Route::get('payments/unpaid', [PaymentController::class, 'unpaid'])->name('payments.unpaid');
     Route::resource('payments', PaymentController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('salaries', SalaryController::class)->only(['index', 'store', 'update', 'destroy']);

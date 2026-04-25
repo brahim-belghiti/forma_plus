@@ -1,5 +1,5 @@
 import { Head, useForm, router } from '@inertiajs/react';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,8 +10,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Spinner } from '@/components/ui/spinner';
 import InputError from '@/components/input-error';
 import { index, store, update, destroy } from '@/actions/App/Http/Controllers/SalaryController';
-import type { Salary, Teacher, PaginatedData } from '@/types';
-import { Pencil, Trash2, Plus } from 'lucide-react';
+import type { Salary, Teacher, SalaryContext, PaginatedData } from '@/types';
+import { Pencil, Trash2, Plus, Sparkles } from 'lucide-react';
 import { useDebouncedCallback } from '@/hooks/use-debounced-callback';
 
 const MONTHS = [
@@ -32,6 +32,7 @@ const MONTHS = [
 type Props = {
     salaries: PaginatedData<Salary>;
     teachers: { data: Teacher[] };
+    context: SalaryContext;
     filters: {
         search?: string;
         month?: string;
@@ -64,7 +65,11 @@ const emptyForm: SalaryFormData = {
     notes: '',
 };
 
-export default function SalariesIndex({ salaries, teachers, filters }: Props) {
+function monthLabel(month: number): string {
+    return MONTHS.find((m) => m.value === month)?.label ?? '';
+}
+
+export default function SalariesIndex({ salaries, teachers, context, filters }: Props) {
     const [showCreate, setShowCreate] = useState(false);
     const [editingSalary, setEditingSalary] = useState<Salary | null>(null);
 
@@ -122,10 +127,6 @@ export default function SalariesIndex({ salaries, teachers, filters }: Props) {
             notes: salary.notes ?? '',
         });
         setEditingSalary(salary);
-    }
-
-    function monthLabel(month: number): string {
-        return MONTHS.find((m) => m.value === month)?.label ?? '';
     }
 
     const yearOptions = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i);
@@ -250,6 +251,8 @@ export default function SalariesIndex({ salaries, teachers, filters }: Props) {
                         form={createForm}
                         onSubmit={handleCreate}
                         teachers={teachers.data}
+                        context={context}
+                        showContext={true}
                         submitLabel="Créer"
                     />
                 </DialogContent>
@@ -264,6 +267,8 @@ export default function SalariesIndex({ salaries, teachers, filters }: Props) {
                         form={editForm}
                         onSubmit={handleEdit}
                         teachers={teachers.data}
+                        context={null}
+                        showContext={false}
                         submitLabel="Enregistrer"
                     />
                 </DialogContent>
@@ -276,11 +281,42 @@ type SalaryFormProps = {
     form: ReturnType<typeof useForm<SalaryFormData>>;
     onSubmit: (e: FormEvent) => void;
     teachers: Teacher[];
+    context: SalaryContext;
+    showContext: boolean;
     submitLabel: string;
 };
 
-function SalaryForm({ form, onSubmit, teachers, submitLabel }: SalaryFormProps) {
+function SalaryForm({ form, onSubmit, teachers, context, showContext, submitLabel }: SalaryFormProps) {
     const yearOptions = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i);
+
+    const { teacher_id, period_month, period_year } = form.data;
+
+    useEffect(() => {
+        if (!showContext) return;
+        if (!teacher_id || !period_month || !period_year) return;
+
+        router.reload({
+            only: ['context'],
+            data: {
+                teacher_id: Number(teacher_id),
+                month: Number(period_month),
+                year: Number(period_year),
+            },
+            preserveScroll: true,
+            preserveState: true,
+        });
+    }, [showContext, teacher_id, period_month, period_year]);
+
+    const isContextForCurrent =
+        context &&
+        String(context.teacher_id) === teacher_id &&
+        String(context.month) === period_month &&
+        String(context.year) === period_year;
+
+    function useSuggested() {
+        if (!isContextForCurrent || !context) return;
+        form.setData('amount', context.suggested_amount.toString());
+    }
 
     return (
         <form onSubmit={onSubmit}>
@@ -300,19 +336,6 @@ function SalaryForm({ form, onSubmit, teachers, submitLabel }: SalaryFormProps) 
                         </SelectContent>
                     </Select>
                     <InputError message={form.errors.teacher_id} />
-                </div>
-
-                <div className="grid gap-2">
-                    <Label>Montant (DH)</Label>
-                    <Input
-                        type="number"
-                        step="0.01"
-                        min="0.01"
-                        value={form.data.amount}
-                        onChange={(e) => form.setData('amount', e.target.value)}
-                        placeholder="0.00"
-                    />
-                    <InputError message={form.errors.amount} />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -348,6 +371,49 @@ function SalaryForm({ form, onSubmit, teachers, submitLabel }: SalaryFormProps) 
                         </Select>
                         <InputError message={form.errors.period_year} />
                     </div>
+                </div>
+
+                {showContext && isContextForCurrent && context && (
+                    <div className="rounded-lg border bg-muted/30 p-3 text-sm space-y-2">
+                        <p className="font-medium">Activité du mois</p>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-muted-foreground">
+                            <span>Séances (prof présent)</span>
+                            <span className="text-foreground font-medium">{context.sessions_count}</span>
+                            <span>Présences d'élèves</span>
+                            <span className="text-foreground font-medium">{context.present_attendances}</span>
+                            <span>Paiements encaissés</span>
+                            <span className="text-foreground font-medium">
+                                {Number(context.fees_collected).toFixed(2).replace('.', ',')} DH
+                            </span>
+                            <span>Taux appliqué</span>
+                            <span className="text-foreground font-medium">{context.rate}%</span>
+                        </div>
+                        <div className="flex items-center justify-between pt-2 border-t">
+                            <div>
+                                <p className="text-xs text-muted-foreground">Montant suggéré</p>
+                                <p className="font-semibold">
+                                    {Number(context.suggested_amount).toFixed(2).replace('.', ',')} DH
+                                </p>
+                            </div>
+                            <Button type="button" size="sm" variant="secondary" onClick={useSuggested}>
+                                <Sparkles className="mr-1 h-3 w-3" />
+                                Utiliser
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
+                <div className="grid gap-2">
+                    <Label>Montant (DH)</Label>
+                    <Input
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        value={form.data.amount}
+                        onChange={(e) => form.setData('amount', e.target.value)}
+                        placeholder="0.00"
+                    />
+                    <InputError message={form.errors.amount} />
                 </div>
 
                 <div className="grid gap-2">
