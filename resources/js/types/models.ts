@@ -40,6 +40,7 @@ export type Teacher = {
 export type Group = {
     id: number;
     name: string;
+    default_monthly_fee: string | null;
     active: boolean;
     subject_id: number;
     teacher_id: number;

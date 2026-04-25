@@ -253,6 +253,13 @@ class DemoSeeder extends Seeder
             'Français' => 'Fr',
             'Anglais' => 'En',
         ];
+        $feeBySubject = [
+            'Mathématiques' => 350,
+            'Physique-Chimie' => 300,
+            'SVT' => 280,
+            'Français' => 250,
+            'Anglais' => 250,
+        ];
 
         foreach ($teachers as $key => $teacher) {
             foreach ($this->teacherPlans[$key] as $levelName => $subjectNames) {
@@ -264,6 +271,7 @@ class DemoSeeder extends Seeder
                         'subject_id' => $subject->id,
                         'teacher_id' => $teacher->id,
                         'name' => $name,
+                        'default_monthly_fee' => $feeBySubject[$subjectName],
                         'active' => true,
                     ]);
                 }
@@ -286,14 +294,6 @@ class DemoSeeder extends Seeder
             $groupsByLevelId[$levelId][] = $group;
         }
 
-        $feeBySubject = [
-            'Mathématiques' => 350,
-            'Physique-Chimie' => 300,
-            'SVT' => 280,
-            'Français' => 250,
-            'Anglais' => 250,
-        ];
-
         $startChoices = ['-5 months', '-4 months', '-3 months'];
         $enrollments = [];
 
@@ -310,8 +310,7 @@ class DemoSeeder extends Seeder
                 $picked = is_array($picked) ? $picked : [$picked];
 
                 foreach ($picked as $group) {
-                    $subjectName = $group->subject->name;
-                    $baseFee = $feeBySubject[$subjectName] ?? 300;
+                    $baseFee = (float) ($group->default_monthly_fee ?? 300);
                     $fee = $baseFee + random_int(-50, 50);
 
                     $startDate = CarbonImmutable::parse(Arr::random($startChoices))->startOfMonth();
@@ -338,25 +337,74 @@ class DemoSeeder extends Seeder
     private function seedTimeslots(array $groups, array $classrooms): void
     {
         $slotTemplates = [
-            ['start' => '17:00', 'end' => '18:30'],
-            ['start' => '18:30', 'end' => '20:00'],
             ['start' => '15:00', 'end' => '16:30'],
             ['start' => '16:30', 'end' => '18:00'],
+            ['start' => '18:00', 'end' => '19:30'],
+            ['start' => '19:30', 'end' => '21:00'],
         ];
         $weekdays = [DayOfWeek::Monday, DayOfWeek::Tuesday, DayOfWeek::Wednesday, DayOfWeek::Thursday, DayOfWeek::Friday, DayOfWeek::Saturday];
 
-        foreach ($groups as $index => $group) {
-            $days = Arr::random($weekdays, 2);
-            foreach ($days as $dayIndex => $day) {
-                $tpl = $slotTemplates[($index + $dayIndex) % count($slotTemplates)];
+        $bookedByClassroomDay = [];
+        $bookedByTeacherDay = [];
+
+        $overlaps = static function (string $aStart, string $aEnd, array $existing): bool {
+            foreach ($existing as [$start, $end]) {
+                if ($aStart < $end && $aEnd > $start) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+
+        foreach ($groups as $group) {
+            $usedDays = [];
+            $placed = 0;
+            $candidates = [];
+
+            foreach ($weekdays as $day) {
+                foreach ($slotTemplates as $tpl) {
+                    foreach ($classrooms as $classroom) {
+                        $candidates[] = ['day' => $day, 'tpl' => $tpl, 'classroom' => $classroom];
+                    }
+                }
+            }
+
+            shuffle($candidates);
+
+            foreach ($candidates as $pick) {
+                if ($placed >= 2) {
+                    break;
+                }
+
+                if (isset($usedDays[$pick['day']->value])) {
+                    continue;
+                }
+
+                $classroomKey = $pick['day']->value.'|'.$pick['classroom']->id;
+                $teacherKey = $pick['day']->value.'|'.$group->teacher_id;
+
+                if ($overlaps($pick['tpl']['start'], $pick['tpl']['end'], $bookedByClassroomDay[$classroomKey] ?? [])) {
+                    continue;
+                }
+
+                if ($overlaps($pick['tpl']['start'], $pick['tpl']['end'], $bookedByTeacherDay[$teacherKey] ?? [])) {
+                    continue;
+                }
+
                 Timeslot::create([
                     'school_id' => $this->school->id,
                     'group_id' => $group->id,
-                    'classroom_id' => $classrooms[($index + $dayIndex) % count($classrooms)]->id,
-                    'day_of_week' => $day->value,
-                    'start_time' => $tpl['start'],
-                    'end_time' => $tpl['end'],
+                    'classroom_id' => $pick['classroom']->id,
+                    'day_of_week' => $pick['day']->value,
+                    'start_time' => $pick['tpl']['start'],
+                    'end_time' => $pick['tpl']['end'],
                 ]);
+
+                $bookedByClassroomDay[$classroomKey][] = [$pick['tpl']['start'], $pick['tpl']['end']];
+                $bookedByTeacherDay[$teacherKey][] = [$pick['tpl']['start'], $pick['tpl']['end']];
+                $usedDays[$pick['day']->value] = true;
+                $placed++;
             }
         }
     }
@@ -372,7 +420,7 @@ class DemoSeeder extends Seeder
             $start = CarbonImmutable::parse($enrollment->start_date)->startOfMonth();
             $cursor = $start;
 
-            while ($cursor->lessThan($now)) {
+            while ($cursor->lessThanOrEqualTo($now)) {
                 $leaveUnpaid = random_int(1, 100) <= 25;
                 if (! $leaveUnpaid) {
                     Payment::create([

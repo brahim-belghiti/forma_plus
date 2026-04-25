@@ -89,6 +89,28 @@ test('user can create a group', function () {
     ]);
 });
 
+test('group can store a default monthly fee', function () {
+    $this->actingAs($this->user)->post(route('groups.store'), [
+        'name' => 'math-1ac',
+        'subject_id' => $this->subject->id,
+        'teacher_id' => $this->teacher->id,
+        'default_monthly_fee' => 350.50,
+        'active' => true,
+    ])->assertRedirect();
+
+    $group = Group::where('name', 'math-1ac')->first();
+    expect((float) $group->default_monthly_fee)->toBe(350.50);
+});
+
+test('default monthly fee must be non-negative', function () {
+    $this->actingAs($this->user)->post(route('groups.store'), [
+        'name' => 'math-1ac',
+        'subject_id' => $this->subject->id,
+        'teacher_id' => $this->teacher->id,
+        'default_monthly_fee' => -10,
+    ])->assertSessionHasErrors('default_monthly_fee');
+});
+
 test('group requires name, subject, and teacher', function () {
     $this->actingAs($this->user)->post(route('groups.store'), [])
         ->assertSessionHasErrors(['name', 'subject_id', 'teacher_id']);

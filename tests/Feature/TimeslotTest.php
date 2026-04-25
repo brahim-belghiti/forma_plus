@@ -142,3 +142,109 @@ test('guest cannot access timeslots', function () {
 
     $response->assertRedirect(route('login'));
 });
+
+test('cannot create a timeslot that double-books a classroom', function () {
+    Timeslot::factory()->create([
+        'school_id' => $this->school->id,
+        'group_id' => $this->group->id,
+        'classroom_id' => $this->classroom->id,
+        'day_of_week' => DayOfWeek::Monday,
+        'start_time' => '09:00',
+        'end_time' => '11:00',
+    ]);
+
+    $otherTeacher = Teacher::factory()->create(['school_id' => $this->school->id]);
+    $otherGroup = Group::factory()->create([
+        'school_id' => $this->school->id,
+        'subject_id' => $this->subject->id,
+        'teacher_id' => $otherTeacher->id,
+    ]);
+
+    $response = $this->actingAs($this->user)->post(route('timeslots.store'), [
+        'group_id' => $otherGroup->id,
+        'classroom_id' => $this->classroom->id,
+        'day_of_week' => DayOfWeek::Monday->value,
+        'start_time' => '10:00',
+        'end_time' => '12:00',
+    ]);
+
+    $response->assertSessionHasErrors('classroom_id');
+});
+
+test('cannot create a timeslot that double-books a teacher', function () {
+    Timeslot::factory()->create([
+        'school_id' => $this->school->id,
+        'group_id' => $this->group->id,
+        'classroom_id' => $this->classroom->id,
+        'day_of_week' => DayOfWeek::Monday,
+        'start_time' => '09:00',
+        'end_time' => '11:00',
+    ]);
+
+    $otherClassroom = Classroom::factory()->create(['school_id' => $this->school->id]);
+    $sameTeacherGroup = Group::factory()->create([
+        'school_id' => $this->school->id,
+        'subject_id' => $this->subject->id,
+        'teacher_id' => $this->teacher->id,
+    ]);
+
+    $response = $this->actingAs($this->user)->post(route('timeslots.store'), [
+        'group_id' => $sameTeacherGroup->id,
+        'classroom_id' => $otherClassroom->id,
+        'day_of_week' => DayOfWeek::Monday->value,
+        'start_time' => '10:00',
+        'end_time' => '12:00',
+    ]);
+
+    $response->assertSessionHasErrors('group_id');
+});
+
+test('non-overlapping timeslots in same classroom are allowed', function () {
+    Timeslot::factory()->create([
+        'school_id' => $this->school->id,
+        'group_id' => $this->group->id,
+        'classroom_id' => $this->classroom->id,
+        'day_of_week' => DayOfWeek::Monday,
+        'start_time' => '09:00',
+        'end_time' => '10:30',
+    ]);
+
+    $otherTeacher = Teacher::factory()->create(['school_id' => $this->school->id]);
+    $otherGroup = Group::factory()->create([
+        'school_id' => $this->school->id,
+        'subject_id' => $this->subject->id,
+        'teacher_id' => $otherTeacher->id,
+    ]);
+
+    $response = $this->actingAs($this->user)->post(route('timeslots.store'), [
+        'group_id' => $otherGroup->id,
+        'classroom_id' => $this->classroom->id,
+        'day_of_week' => DayOfWeek::Monday->value,
+        'start_time' => '10:30',
+        'end_time' => '12:00',
+    ]);
+
+    $response->assertSessionHasNoErrors();
+    $this->assertDatabaseCount('timeslots', 2);
+});
+
+test('updating a timeslot does not conflict with itself', function () {
+    $timeslot = Timeslot::factory()->create([
+        'school_id' => $this->school->id,
+        'group_id' => $this->group->id,
+        'classroom_id' => $this->classroom->id,
+        'day_of_week' => DayOfWeek::Monday,
+        'start_time' => '09:00',
+        'end_time' => '11:00',
+    ]);
+
+    $response = $this->actingAs($this->user)->put(route('timeslots.update', $timeslot), [
+        'group_id' => $this->group->id,
+        'classroom_id' => $this->classroom->id,
+        'day_of_week' => DayOfWeek::Monday->value,
+        'start_time' => '09:30',
+        'end_time' => '11:30',
+    ]);
+
+    $response->assertSessionHasNoErrors();
+});

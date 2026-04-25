@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
-#[Fillable(['school_id', 'subject_id', 'teacher_id', 'name', 'active'])]
+#[Fillable(['school_id', 'subject_id', 'teacher_id', 'name', 'default_monthly_fee', 'active'])]
 class Group extends Model
 {
     /** @use HasFactory<GroupFactory> */
@@ -21,6 +21,7 @@ class Group extends Model
     protected function casts(): array
     {
         return [
+            'default_monthly_fee' => 'decimal:2',
             'active' => 'boolean',
         ];
     }

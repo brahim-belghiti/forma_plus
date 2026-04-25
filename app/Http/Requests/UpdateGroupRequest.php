@@ -20,6 +20,7 @@ class UpdateGroupRequest extends FormRequest
             'name' => ['required', 'string', 'max:100'],
             'subject_id' => ['required', 'exists:subjects,id'],
             'teacher_id' => ['required', 'exists:teachers,id'],
+            'default_monthly_fee' => ['nullable', 'numeric', 'min:0'],
             'active' => ['boolean'],
         ];
     }

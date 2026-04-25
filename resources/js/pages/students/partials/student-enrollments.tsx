@@ -221,11 +221,20 @@ type FieldsProps = {
 };
 
 function EnrollmentFields({ form, groups, showEndDate }: FieldsProps) {
+    function handleGroupChange(value: string) {
+        const group = groups.find((g) => String(g.id) === value);
+        form.setData((prev) => ({
+            ...prev,
+            group_id: value,
+            monthly_fee: group?.default_monthly_fee ?? prev.monthly_fee,
+        }));
+    }
+
     return (
         <div className="grid gap-4 py-4">
             <div className="grid gap-2">
                 <Label>Groupe</Label>
-                <Select value={form.data.group_id} onValueChange={(v) => form.setData('group_id', v)}>
+                <Select value={form.data.group_id} onValueChange={handleGroupChange}>
                     <SelectTrigger>
                         <SelectValue placeholder="Sélectionner un groupe" />
                     </SelectTrigger>
@@ -238,6 +247,7 @@ function EnrollmentFields({ form, groups, showEndDate }: FieldsProps) {
                                     {g.name}
                                     {g.subject?.name ? ` · ${g.subject.name}` : ''}
                                     {g.teacher?.full_name ? ` · ${g.teacher.full_name}` : ''}
+                                    {g.default_monthly_fee ? ` · ${Number(g.default_monthly_fee).toFixed(2).replace('.', ',')} DH` : ''}
                                 </SelectItem>
                             ))
                         )}

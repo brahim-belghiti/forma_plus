@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react';
+import { Users, UserCheck, CreditCard, Banknote, Receipt, TrendingUp, TrendingDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { dashboard } from '@/routes';
-import { Users, UserCheck, CreditCard, Banknote, Receipt, TrendingUp, TrendingDown } from 'lucide-react';
 
 type Props = {
     stats: {

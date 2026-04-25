@@ -23,6 +23,7 @@ class GroupFactory extends Factory
             'subject_id' => Subject::factory(),
             'teacher_id' => Teacher::factory(),
             'name' => 'Groupe '.fake()->bothify('??-##'),
+            'default_monthly_fee' => null,
             'active' => true,
         ];
     }

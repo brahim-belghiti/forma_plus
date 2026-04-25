@@ -2,12 +2,15 @@
 
 namespace App\Http\Requests;
 
+use App\Concerns\ValidatesTimeslotConflicts;
 use App\Enums\DayOfWeek;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateTimeslotRequest extends FormRequest
 {
+    use ValidatesTimeslotConflicts;
+
     public function authorize(): bool
     {
         return $this->user()->can('update', $this->route('timeslot'));

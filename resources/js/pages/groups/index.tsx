@@ -24,6 +24,7 @@ type GroupFormData = {
     name: string;
     subject_id: string;
     teacher_id: string;
+    default_monthly_fee: string;
     active: boolean;
 };
 
@@ -31,6 +32,7 @@ const emptyForm: GroupFormData = {
     name: '',
     subject_id: '',
     teacher_id: '',
+    default_monthly_fee: '',
     active: true,
 };
 
@@ -82,6 +84,7 @@ export default function GroupsIndex({ groups, subjects, teachers, filters }: Pro
             name: group.name,
             subject_id: String(group.subject_id),
             teacher_id: String(group.teacher_id),
+            default_monthly_fee: group.default_monthly_fee ?? '',
             active: group.active,
         });
         setEditingGroup(group);
@@ -123,6 +126,7 @@ export default function GroupsIndex({ groups, subjects, teachers, filters }: Pro
                             <TableHead>Matière</TableHead>
                             <TableHead>Niveau</TableHead>
                             <TableHead>Professeur</TableHead>
+                            <TableHead>Tarif par défaut</TableHead>
                             <TableHead className="text-center">Élèves actifs</TableHead>
                             <TableHead>Statut</TableHead>
                             <TableHead className="w-24"></TableHead>
@@ -131,7 +135,7 @@ export default function GroupsIndex({ groups, subjects, teachers, filters }: Pro
                     <TableBody>
                         {groups.data.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                                <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                                     Aucun groupe pour l'instant.
                                 </TableCell>
                             </TableRow>
@@ -142,6 +146,11 @@ export default function GroupsIndex({ groups, subjects, teachers, filters }: Pro
                                     <TableCell>{group.subject?.name}</TableCell>
                                     <TableCell>{group.subject?.level?.name ?? '—'}</TableCell>
                                     <TableCell>{group.teacher?.full_name}</TableCell>
+                                    <TableCell>
+                                        {group.default_monthly_fee
+                                            ? `${Number(group.default_monthly_fee).toFixed(2).replace('.', ',')} DH`
+                                            : '—'}
+                                    </TableCell>
                                     <TableCell className="text-center">{group.active_enrollments_count ?? 0}</TableCell>
                                     <TableCell>
                                         <Badge variant={group.active ? 'default' : 'secondary'}>
@@ -255,6 +264,23 @@ function GroupForm({ form, onSubmit, subjects, teachers, submitLabel }: GroupFor
                         </SelectContent>
                     </Select>
                     <InputError message={form.errors.teacher_id} />
+                </div>
+
+                <div className="grid gap-2">
+                    <Label htmlFor="group-fee">Tarif mensuel par défaut (DH)</Label>
+                    <Input
+                        id="group-fee"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={form.data.default_monthly_fee}
+                        onChange={(e) => form.setData('default_monthly_fee', e.target.value)}
+                        placeholder="Optionnel"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                        Pré-rempli lors de la création d'une inscription. Modifiable par élève.
+                    </p>
+                    <InputError message={form.errors.default_monthly_fee} />
                 </div>
 
                 <div className="grid gap-2">
