@@ -24,10 +24,16 @@ class StudentController extends Controller
 
         $students = Student::with(['level'])
             ->withCount(['enrollments as active_enrollments_count' => fn ($q) => $q->where('active', true)])
-            ->when($request->input('search'), fn ($q, $search) => $q->where(function ($q) use ($search) {
-                $q->where('first_name', 'like', "%{$search}%")
-                    ->orWhere('last_name', 'like', "%{$search}%");
-            }))
+            ->when($request->input('search'), function ($q, $search) {
+                $tokens = preg_split('/\s+/', trim($search), -1, PREG_SPLIT_NO_EMPTY);
+
+                foreach ($tokens as $token) {
+                    $q->where(function ($q) use ($token) {
+                        $q->where('first_name', 'like', "%{$token}%")
+                            ->orWhere('last_name', 'like', "%{$token}%");
+                    });
+                }
+            })
             ->when($request->input('level_id'), fn ($q, $levelId) => $q->where('level_id', $levelId))
             ->orderBy('last_name')
             ->orderBy('first_name')

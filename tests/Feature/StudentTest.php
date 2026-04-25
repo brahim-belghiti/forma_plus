@@ -47,6 +47,24 @@ test('students can be filtered by search', function () {
     $response->assertInertia(fn ($page) => $page->has('students.data', 1));
 });
 
+test('students search matches tokens across first and last name in any order', function () {
+    Student::factory()->create(['school_id' => $this->school->id, 'first_name' => 'Anas', 'last_name' => 'Hassan']);
+    Student::factory()->create(['school_id' => $this->school->id, 'first_name' => 'Anas', 'last_name' => 'Other']);
+    Student::factory()->create(['school_id' => $this->school->id, 'first_name' => 'Other', 'last_name' => 'Hassan']);
+
+    $response = $this->actingAs($this->user)->get(route('students.index', ['search' => 'anas hassan']));
+
+    $response->assertInertia(fn ($page) => $page
+        ->has('students.data', 1)
+        ->where('students.data.0.first_name', 'Anas')
+        ->where('students.data.0.last_name', 'Hassan')
+    );
+
+    $reversed = $this->actingAs($this->user)->get(route('students.index', ['search' => 'hassan anas']));
+
+    $reversed->assertInertia(fn ($page) => $page->has('students.data', 1));
+});
+
 test('students can be filtered by level', function () {
     $level = Level::factory()->create(['school_id' => $this->school->id]);
     Student::factory()->create(['school_id' => $this->school->id, 'level_id' => $level->id]);

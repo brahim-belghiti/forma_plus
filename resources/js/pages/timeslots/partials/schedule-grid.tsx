@@ -169,7 +169,7 @@ export function ScheduleGrid({
                                                 }}
                                                 className={cn(
                                                     'absolute right-1 left-1 overflow-hidden rounded-md border-l-4 px-2 py-1 text-left text-xs shadow-sm transition hover:shadow-md hover:brightness-95 dark:hover:brightness-110',
-                                                    colorFor(t.group?.subject_id ?? t.group_id),
+                                                    colorFor(t.group?.subject?.level?.id ?? t.group?.subject_id ?? t.group_id),
                                                     isConflict && 'ring-2 ring-destructive ring-offset-1',
                                                 )}
                                                 style={{ top, height: Math.max(height, 24) }}

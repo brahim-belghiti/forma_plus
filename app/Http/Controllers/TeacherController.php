@@ -21,10 +21,16 @@ class TeacherController extends Controller
         Gate::authorize('viewAny', Teacher::class);
 
         $teachers = Teacher::with(['subjects.level'])
-            ->when($request->input('search'), fn ($q, $search) => $q->where(function ($q) use ($search) {
-                $q->where('first_name', 'like', "%{$search}%")
-                    ->orWhere('last_name', 'like', "%{$search}%");
-            }))
+            ->when($request->input('search'), function ($q, $search) {
+                $tokens = preg_split('/\s+/', trim($search), -1, PREG_SPLIT_NO_EMPTY);
+
+                foreach ($tokens as $token) {
+                    $q->where(function ($q) use ($token) {
+                        $q->where('first_name', 'like', "%{$token}%")
+                            ->orWhere('last_name', 'like', "%{$token}%");
+                    });
+                }
+            })
             ->orderBy('last_name')
             ->orderBy('first_name')
             ->paginate(20)

@@ -35,6 +35,24 @@ test('user only sees teachers from their school', function () {
     );
 });
 
+test('teachers search matches tokens across first and last name in any order', function () {
+    Teacher::factory()->create(['school_id' => $this->school->id, 'first_name' => 'Anas', 'last_name' => 'Hassan']);
+    Teacher::factory()->create(['school_id' => $this->school->id, 'first_name' => 'Anas', 'last_name' => 'Other']);
+    Teacher::factory()->create(['school_id' => $this->school->id, 'first_name' => 'Other', 'last_name' => 'Hassan']);
+
+    $response = $this->actingAs($this->user)->get(route('teachers.index', ['search' => 'anas hassan']));
+
+    $response->assertInertia(fn ($page) => $page
+        ->has('teachers.data', 1)
+        ->where('teachers.data.0.first_name', 'Anas')
+        ->where('teachers.data.0.last_name', 'Hassan')
+    );
+
+    $reversed = $this->actingAs($this->user)->get(route('teachers.index', ['search' => 'hassan anas']));
+
+    $reversed->assertInertia(fn ($page) => $page->has('teachers.data', 1));
+});
+
 test('user can view create teacher form', function () {
     $response = $this->actingAs($this->user)->get(route('teachers.create'));
 
