@@ -1,11 +1,12 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Banknote, Calendar, ClipboardList, CreditCard, DoorOpen, FolderGit2, GraduationCap, LayoutGrid, Layers, Receipt, UserCheck, Users } from 'lucide-react';
+import { Banknote, Calendar, ClipboardList, CreditCard, DoorOpen, FolderGit2, GraduationCap, LayoutGrid, Layers, Receipt, UserCheck, UserCog, Users } from 'lucide-react';
 import { index as classroomsIndex } from '@/actions/App/Http/Controllers/ClassroomController';
 import { index as sessionsIndex } from '@/actions/App/Http/Controllers/ClassSessionController';
 import { index as expensesIndex } from '@/actions/App/Http/Controllers/ExpenseController';
 import { index as groupsIndex } from '@/actions/App/Http/Controllers/GroupController';
 import { index as levelsIndex } from '@/actions/App/Http/Controllers/LevelController';
 import { unpaid as paymentsUnpaid } from '@/actions/App/Http/Controllers/PaymentController';
+import { index as personnelIndex } from '@/actions/App/Http/Controllers/PersonnelController';
 import { index as salariesIndex } from '@/actions/App/Http/Controllers/SalaryController';
 import { index as studentsIndex } from '@/actions/App/Http/Controllers/StudentController';
 import { index as subjectsIndex } from '@/actions/App/Http/Controllers/SubjectController';
@@ -90,6 +91,12 @@ const mainNavItems: NavItemWithRole[] = [
         title: 'Dépenses',
         href: expensesIndex.url(),
         icon: Receipt,
+        adminOnly: true,
+    },
+    {
+        title: 'Personnel',
+        href: personnelIndex.url(),
+        icon: UserCog,
         adminOnly: true,
     },
 ];

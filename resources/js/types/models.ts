@@ -5,6 +5,13 @@ export type Classroom = {
     updated_at: string;
 };
 
+export type Personnel = {
+    id: number;
+    name: string;
+    email: string;
+    created_at: string;
+};
+
 export type Level = {
     id: number;
     name: string;

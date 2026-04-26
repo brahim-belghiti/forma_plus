@@ -8,6 +8,7 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\LevelController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PersonnelController;
 use App\Http\Controllers\SalaryController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
@@ -51,6 +52,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('payments', PaymentController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('salaries', SalaryController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('expenses', ExpenseController::class)->only(['index', 'store', 'update', 'destroy']);
+
+    Route::put('personnel/{personnel}/password', [PersonnelController::class, 'resetPassword'])
+        ->name('personnel.password');
+    Route::resource('personnel', PersonnelController::class)
+        ->parameters(['personnel' => 'personnel'])
+        ->only(['index', 'store', 'update', 'destroy']);
 });
 
 require __DIR__.'/settings.php';
