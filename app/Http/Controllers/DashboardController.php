@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Dashboard\UnpaidStudentsAlert;
 use App\Models\Attendance;
 use App\Models\Classroom;
 use App\Models\ClassSession;
@@ -127,58 +128,10 @@ class DashboardController extends Controller
     private function buildAlerts(): array
     {
         return [
-            'unpaid' => $this->unpaidStudentsAlert(),
+            'unpaid' => (new UnpaidStudentsAlert)(),
             'under_enrolled' => $this->underEnrolledGroupsAlert(),
             'idle_teachers' => $this->idleTeachersAlert(),
             'low_attendance' => $this->lowAttendanceStudentsAlert(),
-        ];
-    }
-
-    /**
-     * @return array{count: int, items: array<int, array<string, mixed>>}
-     */
-    private function unpaidStudentsAlert(): array
-    {
-        $rows = [];
-
-        Enrollment::with(['student', 'payments'])
-            ->where(function ($q) {
-                $q->where('active', true)->orWhereNull('end_date');
-            })
-            ->chunk(200, function ($enrollments) use (&$rows) {
-                foreach ($enrollments as $enrollment) {
-                    if (! $enrollment->student) {
-                        continue;
-                    }
-
-                    $unpaidCount = count($enrollment->unpaidPeriods());
-
-                    if ($unpaidCount < 2) {
-                        continue;
-                    }
-
-                    $studentId = $enrollment->student_id;
-                    $totalDue = $unpaidCount * (float) $enrollment->monthly_fee;
-
-                    if (! isset($rows[$studentId])) {
-                        $rows[$studentId] = [
-                            'student_id' => $studentId,
-                            'student_name' => trim($enrollment->student->first_name.' '.$enrollment->student->last_name),
-                            'unpaid_count' => 0,
-                            'total_due' => 0.0,
-                        ];
-                    }
-
-                    $rows[$studentId]['unpaid_count'] = max($rows[$studentId]['unpaid_count'], $unpaidCount);
-                    $rows[$studentId]['total_due'] += $totalDue;
-                }
-            });
-
-        usort($rows, fn ($a, $b) => $b['total_due'] <=> $a['total_due']);
-
-        return [
-            'count' => count($rows),
-            'items' => array_slice(array_values($rows), 0, 5),
         ];
     }
 

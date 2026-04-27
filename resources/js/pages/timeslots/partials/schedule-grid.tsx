@@ -250,7 +250,7 @@ export function detectConflicts(timeslots: Timeslot[]): Set<number> {
 
 export function computeHourRange(timeslots: Timeslot[]): { start: number; end: number } {
     let minStart = 8 * 60;
-    let maxEnd = 21 * 60;
+    let maxEnd = 23 * 60;
 
     for (const t of timeslots) {
         const s = parseTime(t.start_time);
