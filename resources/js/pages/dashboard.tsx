@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { Activity as ActivityIcon, AlertCircle, AlertTriangle, Banknote, BookOpen, Building2, CalendarCheck, CalendarX, Clock, CreditCard, Minus, Percent, PiggyBank, Receipt, TrendingDown, TrendingUp, UserCheck, UserX, Users, UsersRound, Wallet } from 'lucide-react';
+import { useState } from 'react';
 import { index as groupsIndex } from '@/actions/App/Http/Controllers/GroupController';
 import { edit as editStudent } from '@/actions/App/Http/Controllers/StudentController';
 import { edit as editTeacher } from '@/actions/App/Http/Controllers/TeacherController';
@@ -66,6 +67,16 @@ type Props = {
     activity: Activity;
     totals: Totals;
 };
+
+type Tab = 'finances' | 'alertes' | 'activite';
+
+const TABS: { id: Tab; label: string }[] = [
+    { id: 'finances', label: 'Finances' },
+    { id: 'alertes', label: 'Alertes' },
+    { id: 'activite', label: 'Activité' },
+];
+
+const STORAGE_KEY = 'dashboard-tab';
 
 function formatCurrency(value: number): string {
     return value.toFixed(2).replace('.', ',') + ' DH';
@@ -176,9 +187,27 @@ function formatCount(count: number, items: unknown[]): string | null {
     return null;
 }
 
+function totalAlertCount(alerts: Alerts): number {
+    return alerts.unpaid.count + alerts.under_enrolled.count + alerts.idle_teachers.count + alerts.low_attendance.count;
+}
+
 export default function Dashboard({ month, previous, outstanding, alerts, activity, totals }: Props) {
+    const [activeTab, setActiveTab] = useState<Tab>(() => {
+        try {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored === 'finances' || stored === 'alertes' || stored === 'activite') return stored;
+        } catch {}
+        return 'finances';
+    });
+
     const profitPositive = month.profit >= 0;
     const allTimeBalance = totals.all_time_revenue - totals.all_time_salaries - totals.all_time_expenses;
+    const alertCount = totalAlertCount(alerts);
+
+    function switchTab(tab: Tab) {
+        setActiveTab(tab);
+        try { localStorage.setItem(STORAGE_KEY, tab); } catch {}
+    }
 
     return (
         <>
@@ -186,67 +215,204 @@ export default function Dashboard({ month, previous, outstanding, alerts, activi
             <div className="flex flex-col gap-6">
                 <h1 className="text-2xl font-semibold">Tableau de bord</h1>
 
-                <section>
-                    <div className="mb-3 flex items-baseline justify-between">
-                        <h2 className="text-lg font-semibold">Argent ce mois-ci</h2>
-                        <span className="text-sm text-muted-foreground capitalize">{month.label}</span>
+                {/* Summary strip */}
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    <div className="rounded-lg border bg-card px-4 py-3">
+                        <p className="text-xs text-muted-foreground">Élèves actifs</p>
+                        <p className="mt-0.5 text-xl font-bold">{activity.active_students}</p>
                     </div>
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Revenu encaissé</CardTitle>
-                                <Wallet className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{formatCurrency(month.revenue)}</div>
-                                <Delta current={month.revenue} previous={previous.revenue} format={formatCurrency} />
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Impayés en cours</CardTitle>
-                                <AlertCircle className="h-4 w-4 text-amber-600" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold text-amber-600">{formatCurrency(outstanding)}</div>
-                                <p className="mt-1 text-xs text-muted-foreground">
-                                    Cumul de tous les mois non payés
-                                </p>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Bénéfice ce mois</CardTitle>
-                                <PiggyBank className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className={cn('text-2xl font-bold', profitPositive ? 'text-emerald-600' : 'text-rose-600')}>
-                                    {formatCurrency(month.profit)}
-                                </div>
-                                <Delta current={month.profit} previous={previous.profit} format={formatCurrency} />
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Taux de recouvrement</CardTitle>
-                                <Percent className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{formatPct(month.recovery_rate)}</div>
-                                <PercentDelta current={month.recovery_rate} previous={previous.recovery_rate} />
-                                <p className="mt-1 text-xs text-muted-foreground">
-                                    {formatCurrency(month.collected_for_period)} / {formatCurrency(month.billable)} facturable
-                                </p>
-                            </CardContent>
-                        </Card>
+                    <div className="rounded-lg border bg-card px-4 py-3">
+                        <p className="text-xs text-muted-foreground">Bénéfice ce mois</p>
+                        <p className={cn('mt-0.5 text-xl font-bold', profitPositive ? 'text-emerald-600' : 'text-rose-600')}>
+                            {formatCurrency(month.profit)}
+                        </p>
                     </div>
-                </section>
+                    <div className="rounded-lg border bg-card px-4 py-3">
+                        <p className="text-xs text-muted-foreground">Taux de recouvrement</p>
+                        <p className="mt-0.5 text-xl font-bold">{formatPct(month.recovery_rate)}</p>
+                    </div>
+                    <div className="rounded-lg border bg-card px-4 py-3">
+                        <p className="text-xs text-muted-foreground">Impayés en cours</p>
+                        <p className="mt-0.5 text-xl font-bold text-amber-600">{formatCurrency(outstanding)}</p>
+                    </div>
+                </div>
 
-                <section>
-                    <h2 className="mb-3 text-lg font-semibold">Signaux d'alerte</h2>
+                {/* Tab bar */}
+                <div className="border-b">
+                    <nav className="-mb-px flex gap-0">
+                        {TABS.map((tab) => (
+                            <button
+                                key={tab.id}
+                                onClick={() => switchTab(tab.id)}
+                                className={cn(
+                                    'relative flex items-center gap-2 border-b-2 px-5 py-2.5 text-sm font-medium transition-colors',
+                                    activeTab === tab.id
+                                        ? 'border-primary text-primary'
+                                        : 'border-transparent text-muted-foreground hover:border-border hover:text-foreground',
+                                )}
+                            >
+                                {tab.label}
+                                {tab.id === 'alertes' && alertCount > 0 && (
+                                    <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] font-semibold text-white">
+                                        {alertCount}
+                                    </span>
+                                )}
+                            </button>
+                        ))}
+                    </nav>
+                </div>
+
+                {/* Tab: Finances */}
+                {activeTab === 'finances' && (
+                    <div className="flex flex-col gap-6">
+                        <section>
+                            <div className="mb-3 flex items-baseline justify-between">
+                                <h2 className="text-lg font-semibold">Ce mois-ci</h2>
+                                <span className="text-sm text-muted-foreground capitalize">{month.label}</span>
+                            </div>
+                            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                                <Card>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium">Revenu encaissé</CardTitle>
+                                        <Wallet className="h-4 w-4 text-muted-foreground" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold">{formatCurrency(month.revenue)}</div>
+                                        <Delta current={month.revenue} previous={previous.revenue} format={formatCurrency} />
+                                    </CardContent>
+                                </Card>
+
+                                <Card>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium">Salaires payés</CardTitle>
+                                        <Banknote className="h-4 w-4 text-muted-foreground" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold text-orange-600">{formatCurrency(month.salaries)}</div>
+                                        <p className="mt-1 text-xs text-muted-foreground">Ce mois-ci</p>
+                                    </CardContent>
+                                </Card>
+
+                                <Card>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium">Dépenses</CardTitle>
+                                        <Receipt className="h-4 w-4 text-muted-foreground" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold text-rose-600">{formatCurrency(month.expenses)}</div>
+                                        <p className="mt-1 text-xs text-muted-foreground">Ce mois-ci</p>
+                                    </CardContent>
+                                </Card>
+
+                                <Card>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium">Bénéfice</CardTitle>
+                                        <PiggyBank className="h-4 w-4 text-muted-foreground" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className={cn('text-2xl font-bold', profitPositive ? 'text-emerald-600' : 'text-rose-600')}>
+                                            {formatCurrency(month.profit)}
+                                        </div>
+                                        <Delta current={month.profit} previous={previous.profit} format={formatCurrency} />
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        </section>
+
+                        <section>
+                            <h2 className="mb-3 text-lg font-semibold">Recouvrement</h2>
+                            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                <Card>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium">Taux de recouvrement</CardTitle>
+                                        <Percent className="h-4 w-4 text-muted-foreground" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold">{formatPct(month.recovery_rate)}</div>
+                                        <PercentDelta current={month.recovery_rate} previous={previous.recovery_rate} />
+                                        <p className="mt-1 text-xs text-muted-foreground">
+                                            {formatCurrency(month.collected_for_period)} / {formatCurrency(month.billable)} facturable
+                                        </p>
+                                    </CardContent>
+                                </Card>
+
+                                <Card>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium">Impayés en cours</CardTitle>
+                                        <AlertCircle className="h-4 w-4 text-amber-600" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold text-amber-600">{formatCurrency(outstanding)}</div>
+                                        <p className="mt-1 text-xs text-muted-foreground">
+                                            Cumul de tous les mois non payés
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        </section>
+
+                        <section>
+                            <h2 className="mb-3 text-lg font-semibold">Cumul depuis le début</h2>
+                            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+                                <Card>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium">Élèves</CardTitle>
+                                        <Users className="h-4 w-4 text-muted-foreground" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold">{totals.students}</div>
+                                    </CardContent>
+                                </Card>
+
+                                <Card>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium">Professeurs</CardTitle>
+                                        <UserCheck className="h-4 w-4 text-muted-foreground" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold">{totals.teachers}</div>
+                                    </CardContent>
+                                </Card>
+
+                                <Card>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium">Paiements totaux</CardTitle>
+                                        <CreditCard className="h-4 w-4 text-muted-foreground" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-xl font-bold text-emerald-600">{formatCurrency(totals.all_time_revenue)}</div>
+                                    </CardContent>
+                                </Card>
+
+                                <Card>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium">Salaires totaux</CardTitle>
+                                        <Banknote className="h-4 w-4 text-muted-foreground" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-xl font-bold text-orange-600">{formatCurrency(totals.all_time_salaries)}</div>
+                                    </CardContent>
+                                </Card>
+
+                                <Card>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium">Dépenses totales</CardTitle>
+                                        <Receipt className="h-4 w-4 text-muted-foreground" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-xl font-bold text-rose-600">{formatCurrency(totals.all_time_expenses)}</div>
+                                    </CardContent>
+                                </Card>
+                            </div>
+                            <p className="mt-2 text-xs text-muted-foreground">
+                                Solde cumulé : {formatCurrency(allTimeBalance)}
+                            </p>
+                        </section>
+                    </div>
+                )}
+
+                {/* Tab: Alertes */}
+                {activeTab === 'alertes' && (
                     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                         <AlertCard
                             title="Élèves avec ≥ 2 mois impayés"
@@ -352,157 +518,107 @@ export default function Dashboard({ month, previous, outstanding, alerts, activi
                             )}
                         </AlertCard>
                     </div>
-                </section>
+                )}
 
-                <section>
-                    <h2 className="mb-3 text-lg font-semibold">Activité</h2>
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Élèves actifs</CardTitle>
-                                <ActivityIcon className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{activity.active_students}</div>
-                                <p className="mt-1 text-xs text-muted-foreground">Inscriptions actives uniques</p>
-                            </CardContent>
-                        </Card>
+                {/* Tab: Activité */}
+                {activeTab === 'activite' && (
+                    <div className="flex flex-col gap-6">
+                        <section>
+                            <h2 className="mb-3 text-lg font-semibold">Ce mois-ci</h2>
+                            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                                <Card>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium">Élèves actifs</CardTitle>
+                                        <ActivityIcon className="h-4 w-4 text-muted-foreground" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold">{activity.active_students}</div>
+                                        <p className="mt-1 text-xs text-muted-foreground">Inscriptions actives uniques</p>
+                                    </CardContent>
+                                </Card>
 
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Séances ce mois</CardTitle>
-                                <CalendarCheck className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{activity.sessions_this_month}</div>
-                                <p className="mt-1 text-xs text-muted-foreground">
-                                    dont {activity.teacher_absent_count} sans le professeur
-                                </p>
-                            </CardContent>
-                        </Card>
+                                <Card>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium">Séances ce mois</CardTitle>
+                                        <CalendarCheck className="h-4 w-4 text-muted-foreground" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold">{activity.sessions_this_month}</div>
+                                        <p className="mt-1 text-xs text-muted-foreground">
+                                            dont {activity.teacher_absent_count} sans le professeur
+                                        </p>
+                                    </CardContent>
+                                </Card>
 
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Présence moyenne</CardTitle>
-                                <BookOpen className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{formatPct(activity.attendance_rate)}</div>
-                                <p className="mt-1 text-xs text-muted-foreground">Sur les séances de ce mois</p>
-                            </CardContent>
-                        </Card>
+                                <Card>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium">Présence moyenne</CardTitle>
+                                        <BookOpen className="h-4 w-4 text-muted-foreground" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold">{formatPct(activity.attendance_rate)}</div>
+                                        <p className="mt-1 text-xs text-muted-foreground">Sur les séances de ce mois</p>
+                                    </CardContent>
+                                </Card>
 
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Occupation des salles</CardTitle>
-                                <Building2 className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{formatPct(activity.classroom_utilization)}</div>
-                                <p className="mt-1 text-xs text-muted-foreground">
-                                    {activity.teaching_hours_per_week.toFixed(1).replace('.', ',')} h / sem · base 13 h × 6 j
-                                </p>
-                            </CardContent>
-                        </Card>
+                                <Card>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium">Occupation des salles</CardTitle>
+                                        <Building2 className="h-4 w-4 text-muted-foreground" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold">{formatPct(activity.classroom_utilization)}</div>
+                                        <p className="mt-1 text-xs text-muted-foreground">
+                                            {activity.teaching_hours_per_week.toFixed(1).replace('.', ',')} h / sem · base 13 h × 6 j
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        </section>
+
+                        {activity.top_teachers.length > 0 && (
+                            <section>
+                                <h2 className="mb-3 text-lg font-semibold">Heures par professeur</h2>
+                                <Card>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                                        <CardTitle className="text-sm font-medium">Volume hebdomadaire</CardTitle>
+                                        <Clock className="h-4 w-4 text-muted-foreground" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <ul className="space-y-2">
+                                            {activity.top_teachers.map((t) => {
+                                                const max = activity.top_teachers[0]?.weekly_hours ?? 1;
+                                                const pct = max > 0 ? (t.weekly_hours / max) * 100 : 0;
+
+                                                return (
+                                                    <li key={t.teacher_id}>
+                                                        <Link
+                                                            href={editTeacher(t.teacher_id).url}
+                                                            className="block rounded px-1 py-1 hover:bg-muted"
+                                                        >
+                                                            <div className="mb-1 flex items-center justify-between text-sm">
+                                                                <span className="truncate">{t.full_name}</span>
+                                                                <span className="text-xs text-muted-foreground">
+                                                                    {t.weekly_hours.toFixed(1).replace('.', ',')} h
+                                                                </span>
+                                                            </div>
+                                                            <div className="h-1.5 w-full overflow-hidden rounded bg-muted">
+                                                                <div
+                                                                    className="h-full bg-sky-500"
+                                                                    style={{ width: `${pct}%` }}
+                                                                />
+                                                            </div>
+                                                        </Link>
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    </CardContent>
+                                </Card>
+                            </section>
+                        )}
                     </div>
-
-                    {activity.top_teachers.length > 0 && (
-                        <Card className="mt-4">
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                                <CardTitle className="text-sm font-medium">Heures enseignées par professeur (semaine)</CardTitle>
-                                <Clock className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <ul className="space-y-2">
-                                    {activity.top_teachers.map((t) => {
-                                        const max = activity.top_teachers[0]?.weekly_hours ?? 1;
-                                        const pct = max > 0 ? (t.weekly_hours / max) * 100 : 0;
-
-                                        return (
-                                            <li key={t.teacher_id}>
-                                                <Link
-                                                    href={editTeacher(t.teacher_id).url}
-                                                    className="block rounded px-1 py-1 hover:bg-muted"
-                                                >
-                                                    <div className="mb-1 flex items-center justify-between text-sm">
-                                                        <span className="truncate">{t.full_name}</span>
-                                                        <span className="text-xs text-muted-foreground">
-                                                            {t.weekly_hours.toFixed(1).replace('.', ',')} h
-                                                        </span>
-                                                    </div>
-                                                    <div className="h-1.5 w-full overflow-hidden rounded bg-muted">
-                                                        <div
-                                                            className="h-full bg-sky-500"
-                                                            style={{ width: `${pct}%` }}
-                                                        />
-                                                    </div>
-                                                </Link>
-                                            </li>
-                                        );
-                                    })}
-                                </ul>
-                            </CardContent>
-                        </Card>
-                    )}
-                </section>
-
-                <section>
-                    <h2 className="mb-3 text-lg font-semibold">Cumul depuis le début</h2>
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Élèves</CardTitle>
-                                <Users className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{totals.students}</div>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Professeurs</CardTitle>
-                                <UserCheck className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{totals.teachers}</div>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Paiements totaux</CardTitle>
-                                <CreditCard className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-xl font-bold text-emerald-600">{formatCurrency(totals.all_time_revenue)}</div>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Salaires totaux</CardTitle>
-                                <Banknote className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-xl font-bold text-orange-600">{formatCurrency(totals.all_time_salaries)}</div>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Dépenses totales</CardTitle>
-                                <Receipt className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-xl font-bold text-rose-600">{formatCurrency(totals.all_time_expenses)}</div>
-                            </CardContent>
-                        </Card>
-                    </div>
-                    <p className="mt-2 text-xs text-muted-foreground">
-                        Solde cumulé : {formatCurrency(allTimeBalance)}
-                    </p>
-                </section>
+                )}
             </div>
         </>
     );
