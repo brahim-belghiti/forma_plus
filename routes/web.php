@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\SchoolController as AdminSchoolController;
 use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\ClassSessionController;
 use App\Http\Controllers\DashboardController;
@@ -29,7 +31,18 @@ Route::middleware(['auth', 'verified', EnsureSuperAdmin::class, 'throttle:web'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-        Route::inertia('dashboard', 'admin/dashboard')->name('dashboard');
+        Route::get('dashboard', AdminDashboardController::class)->name('dashboard');
+
+        Route::resource('schools', AdminSchoolController::class)
+            ->only(['index', 'show']);
+
+        Route::middleware('throttle:mutations')->group(function () {
+            Route::resource('schools', AdminSchoolController::class)
+                ->only(['store', 'update', 'destroy']);
+
+            Route::put('schools/{school}/admin-password', [AdminSchoolController::class, 'resetAdminPassword'])
+                ->name('schools.admin-password');
+        });
     });
 
 Route::middleware(['auth', 'verified', EnsureSchoolUser::class, 'throttle:web'])->group(function () {
