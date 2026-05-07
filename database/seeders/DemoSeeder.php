@@ -17,6 +17,7 @@ use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\Timeslot;
+use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Arr;
@@ -415,6 +416,7 @@ class DemoSeeder extends Seeder
     private function seedPayments(array $enrollments): void
     {
         $now = CarbonImmutable::now()->startOfMonth();
+        $recorderIds = User::where('school_id', $this->school->id)->pluck('id')->all();
 
         foreach ($enrollments as $enrollment) {
             $start = CarbonImmutable::parse($enrollment->start_date)->startOfMonth();
@@ -426,6 +428,7 @@ class DemoSeeder extends Seeder
                     Payment::create([
                         'school_id' => $this->school->id,
                         'enrollment_id' => $enrollment->id,
+                        'recorded_by' => empty($recorderIds) ? null : Arr::random($recorderIds),
                         'amount' => (float) $enrollment->monthly_fee,
                         'period_month' => $cursor->month,
                         'period_year' => $cursor->year,

@@ -212,3 +212,58 @@ test('user can delete a payment', function () {
 test('guest cannot access payments', function () {
     $this->get(route('payments.index'))->assertRedirect(route('login'));
 });
+
+test('store flashes the new receipt url and number for the QR display', function () {
+    $response = $this->actingAs($this->user)->post(route('payments.store'), [
+        'enrollment_id' => $this->enrollment->id,
+        'amount' => 300,
+        'period_month' => 6,
+        'period_year' => 2026,
+        'paid_at' => '2026-06-01',
+    ]);
+
+    $payment = Payment::latest('id')->first();
+    $response->assertSessionHas('receipt', [
+        'url' => route('receipts.show', $payment->receipt_number),
+        'number' => $payment->receipt_number,
+    ]);
+});
+
+test('store records who created the payment', function () {
+    $this->actingAs($this->user)->post(route('payments.store'), [
+        'enrollment_id' => $this->enrollment->id,
+        'amount' => 300,
+        'period_month' => 5,
+        'period_year' => 2026,
+        'paid_at' => '2026-05-01',
+    ]);
+
+    $payment = Payment::latest('id')->first();
+    expect($payment->recorded_by)->toBe($this->user->id);
+});
+
+test('a payment is assigned a unique receipt_number on creation', function () {
+    $first = Payment::factory()->create([
+        'school_id' => $this->school->id,
+        'enrollment_id' => $this->enrollment->id,
+        'period_month' => 1,
+        'period_year' => 2026,
+    ]);
+
+    $other = Enrollment::factory()->create([
+        'school_id' => $this->school->id,
+        'student_id' => $this->student->id,
+        'group_id' => $this->group->id,
+    ]);
+    $second = Payment::factory()->create([
+        'school_id' => $this->school->id,
+        'enrollment_id' => $other->id,
+        'period_month' => 2,
+        'period_year' => 2026,
+    ]);
+
+    expect($first->receipt_number)
+        ->toBeString()
+        ->toHaveLength(26);
+    expect($second->receipt_number)->not->toBe($first->receipt_number);
+});

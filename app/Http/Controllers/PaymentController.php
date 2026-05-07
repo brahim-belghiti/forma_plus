@@ -87,9 +87,15 @@ class PaymentController extends Controller
 
     public function store(StorePaymentRequest $request): RedirectResponse
     {
-        Payment::create($request->validated());
+        $payment = Payment::create([
+            ...$request->validated(),
+            'recorded_by' => $request->user()->id,
+        ]);
 
-        return back();
+        return back()->with('receipt', [
+            'url' => route('receipts.show', $payment->receipt_number),
+            'number' => $payment->receipt_number,
+        ]);
     }
 
     public function update(UpdatePaymentRequest $request, Payment $payment): RedirectResponse

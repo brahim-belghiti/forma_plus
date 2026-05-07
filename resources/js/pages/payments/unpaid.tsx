@@ -1,5 +1,6 @@
 import { Head, useForm, router, Link } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,8 +13,10 @@ import { Badge } from '@/components/ui/badge';
 import InputError from '@/components/input-error';
 import { index, unpaid, store } from '@/actions/App/Http/Controllers/PaymentController';
 import type { UnpaidRow } from '@/types';
-import { History, CheckCircle2 } from 'lucide-react';
+import { History, CheckCircle2, Copy, Check } from 'lucide-react';
 import { useDebouncedCallback } from '@/hooks/use-debounced-callback';
+
+type Receipt = { url: string; number: string };
 
 const MONTHS = [
     { value: 1, label: 'Janvier' },
@@ -54,6 +57,8 @@ function monthLabel(m: number) {
 
 export default function UnpaidIndex({ rows, filters }: Props) {
     const [payingRow, setPayingRow] = useState<UnpaidRow | null>(null);
+    const [receipt, setReceipt] = useState<Receipt | null>(null);
+    const [copied, setCopied] = useState(false);
 
     const form = useForm<PayFormData>({
         enrollment_id: '',
@@ -84,7 +89,21 @@ export default function UnpaidIndex({ rows, filters }: Props) {
         e.preventDefault();
         form.post(store.url(), {
             preserveScroll: true,
-            onSuccess: () => setPayingRow(null),
+            onSuccess: (page) => {
+                const flashed = (page.props as { flash?: { receipt: Receipt | null } }).flash?.receipt ?? null;
+                setPayingRow(null);
+                if (flashed) {
+                    setReceipt(flashed);
+                }
+            },
+        });
+    }
+
+    function copyReceiptUrl() {
+        if (!receipt) return;
+        navigator.clipboard.writeText(receipt.url).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
         });
     }
 
@@ -173,6 +192,42 @@ export default function UnpaidIndex({ rows, filters }: Props) {
                     </TableBody>
                 </Table>
             </div>
+
+            <Dialog open={!!receipt} onOpenChange={(open) => !open && setReceipt(null)}>
+                <DialogContent className="sm:max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <CheckCircle2 className="h-5 w-5 text-green-600" />
+                            Paiement enregistré
+                        </DialogTitle>
+                    </DialogHeader>
+                    {receipt && (
+                        <div className="grid gap-4 py-2">
+                            <p className="text-sm text-muted-foreground">
+                                Demandez au parent de scanner ce code pour conserver le reçu.
+                            </p>
+                            <div className="flex justify-center rounded-lg border bg-white p-4">
+                                <QRCodeSVG value={receipt.url} size={200} level="M" />
+                            </div>
+                            <div className="grid gap-1">
+                                <Label className="text-xs text-muted-foreground">N° de reçu</Label>
+                                <p className="font-mono text-xs break-all">{receipt.number}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Input value={receipt.url} readOnly className="font-mono text-xs" />
+                                <Button type="button" variant="outline" size="icon" onClick={copyReceiptUrl}>
+                                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                    <DialogFooter>
+                        <Button type="button" onClick={() => setReceipt(null)}>
+                            Fermer
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             <Dialog open={!!payingRow} onOpenChange={(open) => !open && setPayingRow(null)}>
                 <DialogContent className="sm:max-w-lg">
