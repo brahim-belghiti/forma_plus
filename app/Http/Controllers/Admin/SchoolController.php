@@ -51,14 +51,15 @@ class SchoolController extends Controller
                 'default_salary_rate' => $data['default_salary_rate'] ?? 0,
             ]);
 
-            User::create([
+            $admin = User::create([
                 'name' => $data['admin']['name'],
                 'email' => $data['admin']['email'],
                 'password' => Hash::make($data['admin']['password']),
                 'role' => UserRole::Admin,
                 'school_id' => $school->id,
-                'email_verified_at' => now(),
             ]);
+
+            $admin->forceFill(['email_verified_at' => now()])->save();
         });
 
         return back();

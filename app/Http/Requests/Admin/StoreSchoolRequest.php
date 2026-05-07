@@ -3,13 +3,12 @@
 namespace App\Http\Requests\Admin;
 
 use App\Concerns\PasswordValidationRules;
-use App\Concerns\ProfileValidationRules;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class StoreSchoolRequest extends FormRequest
 {
-    use PasswordValidationRules, ProfileValidationRules;
+    use PasswordValidationRules;
 
     public function authorize(): bool
     {
@@ -25,8 +24,8 @@ class StoreSchoolRequest extends FormRequest
             'name' => ['required', 'string', 'max:255', Rule::unique('schools', 'name')],
             'default_salary_rate' => ['nullable', 'numeric', 'min:0'],
             'admin' => ['required', 'array'],
-            'admin.name' => $this->nameRules(),
-            'admin.email' => $this->emailRules(),
+            'admin.name' => ['required', 'string', 'max:255'],
+            'admin.email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
             'admin.password' => $this->passwordRules(),
         ];
     }
