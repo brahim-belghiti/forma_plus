@@ -11,7 +11,7 @@ class SchoolScope implements Scope
 {
     public function apply(Builder $builder, Model $model): void
     {
-        if (Auth::check()) {
+        if (Auth::check() && Auth::user()->school_id !== null) {
             $builder->where($model->getTable().'.school_id', Auth::user()->school_id);
         }
     }
