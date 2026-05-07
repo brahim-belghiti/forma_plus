@@ -15,18 +15,24 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\TimeslotController;
+use App\Http\Middleware\EnsureSchoolUser;
+use App\Http\Middleware\EnsureSuperAdmin;
 use Illuminate\Support\Facades\Route;
-use Laravel\Fortify\Features;
 
-Route::inertia('/', 'welcome', [
-    'canRegister' => Features::enabled(Features::registration()),
-])->name('home');
+Route::inertia('/', 'welcome')->name('home');
 
 Route::get('receipts/{payment:receipt_number}', [ReceiptController::class, 'show'])
     ->middleware('throttle:receipts')
     ->name('receipts.show');
 
-Route::middleware(['auth', 'verified', 'throttle:web'])->group(function () {
+Route::middleware(['auth', 'verified', EnsureSuperAdmin::class, 'throttle:web'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::inertia('dashboard', 'admin/dashboard')->name('dashboard');
+    });
+
+Route::middleware(['auth', 'verified', EnsureSchoolUser::class, 'throttle:web'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
 
     Route::resource('levels', LevelController::class)->only(['index']);
