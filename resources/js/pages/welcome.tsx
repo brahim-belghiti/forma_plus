@@ -1,12 +1,8 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import AppLogoIcon from '@/components/app-logo-icon';
-import { dashboard, login, register } from '@/routes';
+import { dashboard, login } from '@/routes';
 
-export default function Welcome({
-    canRegister = true,
-}: {
-    canRegister?: boolean;
-}) {
+export default function Welcome() {
     const { auth } = usePage().props;
 
     return (
@@ -37,22 +33,12 @@ export default function Welcome({
                                     Tableau de bord
                                 </Link>
                             ) : (
-                                <>
-                                    <Link
-                                        href={login()}
-                                        className="inline-block rounded-md border border-transparent px-4 py-1.5 leading-normal hover:border-[#19140035] dark:hover:border-[#3E3E3A]"
-                                    >
-                                        Se connecter
-                                    </Link>
-                                    {canRegister && (
-                                        <Link
-                                            href={register()}
-                                            className="inline-block rounded-md bg-[#1b1b18] px-4 py-1.5 leading-normal text-white hover:bg-black dark:bg-[#EDEDEC] dark:text-[#1b1b18] dark:hover:bg-white"
-                                        >
-                                            S'inscrire
-                                        </Link>
-                                    )}
-                                </>
+                                <Link
+                                    href={login()}
+                                    className="inline-block rounded-md border border-[#19140035] px-4 py-1.5 leading-normal hover:border-[#1915014a] dark:border-[#3E3E3A] dark:hover:border-[#62605b]"
+                                >
+                                    Se connecter
+                                </Link>
                             )}
                         </nav>
                     </div>
@@ -84,22 +70,12 @@ export default function Welcome({
                                             Aller au tableau de bord
                                         </Link>
                                     ) : (
-                                        <>
-                                            {canRegister && (
-                                                <Link
-                                                    href={register()}
-                                                    className="inline-flex items-center justify-center rounded-md bg-[#1b1b18] px-5 py-2.5 text-sm font-medium text-white hover:bg-black dark:bg-[#EDEDEC] dark:text-[#1b1b18] dark:hover:bg-white"
-                                                >
-                                                    Commencer
-                                                </Link>
-                                            )}
-                                            <Link
-                                                href={login()}
-                                                className="inline-flex items-center justify-center rounded-md border border-[#19140035] px-5 py-2.5 text-sm font-medium hover:border-[#1915014a] dark:border-[#3E3E3A] dark:hover:border-[#62605b]"
-                                            >
-                                                Se connecter
-                                            </Link>
-                                        </>
+                                        <Link
+                                            href={login()}
+                                            className="inline-flex items-center justify-center rounded-md bg-[#1b1b18] px-5 py-2.5 text-sm font-medium text-white hover:bg-black dark:bg-[#EDEDEC] dark:text-[#1b1b18] dark:hover:bg-white"
+                                        >
+                                            Se connecter
+                                        </Link>
                                     )}
                                 </div>
                             </div>
